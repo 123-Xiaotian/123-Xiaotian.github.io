@@ -1,0 +1,987 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>OOP Unit1 表达式解析 | 123-Xiaotian's Blog</title><meta name="author" content="Ztqs"><meta name="copyright" content="Ztqs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Unit1 表达式解析基于度量的程序结构分析方法级别复杂度度量 (Method Complexity)   方法名 (Method) 基本复杂度 (ev(G)) 设计复杂度 (iv(G)) 圈复杂度 (v(G)) 代码行数 (LOC)    expr.DeriveFactor.DeriveFactor(Expr, int) 0 1 1 1   expr.DeriveFactor.toPoly()">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OOP Unit1 表达式解析">
+<meta property="og:url" content="http://example.com/2026/03/26/2026-3-26-unit1/index.html">
+<meta property="og:site_name" content="123-Xiaotian&#39;s Blog">
+<meta property="og:description" content="Unit1 表达式解析基于度量的程序结构分析方法级别复杂度度量 (Method Complexity)   方法名 (Method) 基本复杂度 (ev(G)) 设计复杂度 (iv(G)) 圈复杂度 (v(G)) 代码行数 (LOC)    expr.DeriveFactor.DeriveFactor(Expr, int) 0 1 1 1   expr.DeriveFactor.toPoly()">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/hutao.jpg">
+<meta property="article:published_time" content="2026-03-26T13:44:00.000Z">
+<meta property="article:modified_time" content="2026-03-30T13:45:05.071Z">
+<meta property="article:author" content="Ztqs">
+<meta property="article:tag" content="AST">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="OOP">
+<meta property="article:tag" content="递归下降">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/hutao.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OOP Unit1 表达式解析",
+  "url": "http://example.com/2026/03/26/2026-3-26-unit1/",
+  "image": "http://example.com/img/hutao.jpg",
+  "datePublished": "2026-03-26T13:44:00.000Z",
+  "dateModified": "2026-03-30T13:45:05.071Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ztqs",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2026/03/26/2026-3-26-unit1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OOP Unit1 表达式解析',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" /><style> body, div, a, p, h1, h2, h3, h4, h5, h6 { font-family: "LXGW WenKai Screen", sans-serif !important; } </style><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/hutao1.jpg);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">123-Xiaotian's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">OOP Unit1 表达式解析</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">OOP Unit1 表达式解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-26T13:44:00.000Z" title="发表于 2026-03-26 21:44:00">2026-03-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-30T13:45:05.071Z" title="更新于 2026-03-30 21:45:05">2026-03-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0/">面向对象设计与构造</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Unit1-表达式解析"><a href="#Unit1-表达式解析" class="headerlink" title="Unit1 表达式解析"></a>Unit1 表达式解析</h1><h2 id="基于度量的程序结构分析"><a href="#基于度量的程序结构分析" class="headerlink" title="基于度量的程序结构分析"></a>基于度量的程序结构分析</h2><h3 id="方法级别复杂度度量-Method-Complexity"><a href="#方法级别复杂度度量-Method-Complexity" class="headerlink" title="方法级别复杂度度量 (Method Complexity)"></a>方法级别复杂度度量 (Method Complexity)</h3><table>
+<thead>
+<tr>
+<th align="left">方法名 (Method)</th>
+<th align="left">基本复杂度 (ev(G))</th>
+<th align="left">设计复杂度 (iv(G))</th>
+<th align="left">圈复杂度 (v(G))</th>
+<th align="left">代码行数 (LOC)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">expr.DeriveFactor.DeriveFactor(Expr, int)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.DeriveFactor.toPoly()</td>
+<td align="left">3</td>
+<td align="left">3</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.ExpFactor.ExpFactor(Factor, int)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.ExpFactor.toPoly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Expr.addTerm(Term)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Expr.Expr()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Expr.toPoly()</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.ExprFactor.ExprFactor(int, Expr)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.ExprFactor.toPoly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Num.Num(BigInteger)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Num.toPoly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.add(Poly)</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.addTerm(TermKey, BigInteger)</td>
+<td align="left">3</td>
+<td align="left">2</td>
+<td align="left">2</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.buildExp(Poly)</td>
+<td align="left"><strong>34</strong></td>
+<td align="left"><strong>10</strong></td>
+<td align="left"><strong>10</strong></td>
+<td align="left"><strong>20</strong></td>
+</tr>
+<tr>
+<td align="left">expr.Poly.buildGcdExp(Poly)</td>
+<td align="left"><strong>26</strong></td>
+<td align="left"><strong>9</strong></td>
+<td align="left">6</td>
+<td align="left">10</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.buildResult(int, int[], String[])</td>
+<td align="left">3</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.deriveX()</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">4</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.deriveY()</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">4</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.equals(Object)</td>
+<td align="left">3</td>
+<td align="left">3</td>
+<td align="left">2</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.getMap()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.greedyCompress(Poly)</td>
+<td align="left"><strong>24</strong></td>
+<td align="left">3</td>
+<td align="left">9</td>
+<td align="left"><strong>11</strong></td>
+</tr>
+<tr>
+<td align="left">expr.Poly.hashCode()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.mul(Poly)</td>
+<td align="left">3</td>
+<td align="left">1</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.Poly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.pow(int)</td>
+<td align="left">6</td>
+<td align="left">2</td>
+<td align="left">5</td>
+<td align="left">5</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.simplify(StringBuilder, TermKey, BigInteger, boolean…)</td>
+<td align="left"><strong>18</strong></td>
+<td align="left">4</td>
+<td align="left"><strong>13</strong></td>
+<td align="left"><strong>15</strong></td>
+</tr>
+<tr>
+<td align="left">expr.Poly.statusCompressDP(Poly)</td>
+<td align="left"><strong>16</strong></td>
+<td align="left">4</td>
+<td align="left">8</td>
+<td align="left"><strong>11</strong></td>
+</tr>
+<tr>
+<td align="left">expr.Poly.substitute(Poly)</td>
+<td align="left">3</td>
+<td align="left">1</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.Poly.toString()</td>
+<td align="left">9</td>
+<td align="left"><strong>7</strong></td>
+<td align="left">5</td>
+<td align="left">8</td>
+</tr>
+<tr>
+<td align="left">expr.SelectFactor.SelectFactor(…)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.SelectFactor.toPoly()</td>
+<td align="left">2</td>
+<td align="left">2</td>
+<td align="left">2</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Term.addFactor(Factor)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Term.Term(int)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Term.toPoly()</td>
+<td align="left">3</td>
+<td align="left">3</td>
+<td align="left">2</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.equals(Object)</td>
+<td align="left">4</td>
+<td align="left">3</td>
+<td align="left">4</td>
+<td align="left">6</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.getExpPoly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.getXvarExp()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.getYvarExp()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.hashCode()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.mul(TermKey)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey.TermKey(BigInteger, BigInteger, Poly)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">expr.Var.toPoly()</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Var.Var(BigInteger, String)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">FuncFactor.FuncFactor(Expr, String)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">FuncFactor.toPoly()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">Lexer.getNum()</td>
+<td align="left">8</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">6</td>
+</tr>
+<tr>
+<td align="left">Lexer.getToken()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">Lexer.handleSign()</td>
+<td align="left">6</td>
+<td align="left">1</td>
+<td align="left">4</td>
+<td align="left">6</td>
+</tr>
+<tr>
+<td align="left">Lexer.Lexer(String)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">Lexer.next()</td>
+<td align="left"><strong>15</strong></td>
+<td align="left">2</td>
+<td align="left">9</td>
+<td align="left"><strong>13</strong></td>
+</tr>
+<tr>
+<td align="left">MainClass.getFuncPolys()</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">MainClass.handleFunction(String, String, String)</td>
+<td align="left"><strong>11</strong></td>
+<td align="left">6</td>
+<td align="left">3</td>
+<td align="left">6</td>
+</tr>
+<tr>
+<td align="left">MainClass.main(String[])</td>
+<td align="left"><strong>18</strong></td>
+<td align="left">4</td>
+<td align="left"><strong>10</strong></td>
+<td align="left"><strong>11</strong></td>
+</tr>
+<tr>
+<td align="left">Parser.parseDeriveFactor(int)</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">Parser.parseExpFactor()</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">5</td>
+</tr>
+<tr>
+<td align="left">Parser.parseExpr()</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">3</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">Parser.parseExprFactor()</td>
+<td align="left">5</td>
+<td align="left">2</td>
+<td align="left">4</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">Parser.parseFactor()</td>
+<td align="left"><strong>32</strong></td>
+<td align="left"><strong>8</strong></td>
+<td align="left"><strong>18</strong></td>
+<td align="left"><strong>20</strong></td>
+</tr>
+<tr>
+<td align="left">Parser.Parser(Lexer)</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">Parser.parseSelectFactor()</td>
+<td align="left">6</td>
+<td align="left">1</td>
+<td align="left">7</td>
+<td align="left">7</td>
+</tr>
+<tr>
+<td align="left">Parser.parseTerm()</td>
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">4</td>
+<td align="left">5</td>
+</tr>
+<tr>
+<td align="left"><strong>总计 (Total)</strong></td>
+<td align="left"><strong>289</strong></td>
+<td align="left"><strong>122</strong></td>
+<td align="left"><strong>196</strong></td>
+<td align="left"><strong>242</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>平均值 (Average)</strong></td>
+<td align="left">4.66</td>
+<td align="left">1.97</td>
+<td align="left">3.16</td>
+<td align="left">3.90</td>
+</tr>
+</tbody></table>
+<hr>
+<p>通过方法级别的复杂度分析，我们可以发现主要的复杂度集中在 <code>Poly</code> 类的 <code>buildExp</code>和<code>simplify</code> 方法中。这两个类的复杂度来源分别是复杂的字符串构建过程以及exp因子判断逻辑。这类复杂度是较难避免的，因为它们涉及到复杂的逻辑判断和字符串操作。除此之外，对于<code>Lexer</code>类中的<code>next</code>方法，其复杂度也较高，因为该方法需要处理多种情况，包括数字、符号、函数等。最应当注意的是<code>MainClass</code>的复杂度，其复杂度来源主要是<code>handleFunction</code>方法，以及递归函数的预求解，出于架构考虑，其实应当抽象出一个类专门处理递归函数。</p>
+<h3 id="代码规模度量-Statistic"><a href="#代码规模度量-Statistic" class="headerlink" title="代码规模度量 (Statistic)"></a>代码规模度量 (Statistic)</h3><table>
+<thead>
+<tr>
+<th align="left">源文件 (Source File)</th>
+<th align="left">总行数 (Total Lines)</th>
+<th align="left">源代码行数 (Source Code Lines)</th>
+<th align="left">源代码占比 (%)</th>
+<th align="left">注释行数 (Comment Lines)</th>
+<th align="left">注释占比 (%)</th>
+<th align="left">空白行数 (Blank Lines)</th>
+<th align="left">空白占比 (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">DeriveFactor.java</td>
+<td align="left">22</td>
+<td align="left">19</td>
+<td align="left">86%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">3</td>
+<td align="left">14%</td>
+</tr>
+<tr>
+<td align="left">ExpFactor.java</td>
+<td align="left">23</td>
+<td align="left">19</td>
+<td align="left">83%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">4</td>
+<td align="left">17%</td>
+</tr>
+<tr>
+<td align="left">Expr.java</td>
+<td align="left">21</td>
+<td align="left">16</td>
+<td align="left">76%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">5</td>
+<td align="left">24%</td>
+</tr>
+<tr>
+<td align="left">ExprFactor.java</td>
+<td align="left">17</td>
+<td align="left">14</td>
+<td align="left">82%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">3</td>
+<td align="left">18%</td>
+</tr>
+<tr>
+<td align="left">Factor.java</td>
+<td align="left">5</td>
+<td align="left">4</td>
+<td align="left">80%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">1</td>
+<td align="left">20%</td>
+</tr>
+<tr>
+<td align="left">FuncFactor.java</td>
+<td align="left">19</td>
+<td align="left">16</td>
+<td align="left">84%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">3</td>
+<td align="left">16%</td>
+</tr>
+<tr>
+<td align="left">Lexer.java</td>
+<td align="left">74</td>
+<td align="left">66</td>
+<td align="left">89%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">8</td>
+<td align="left">11%</td>
+</tr>
+<tr>
+<td align="left">MainClass.java</td>
+<td align="left">98</td>
+<td align="left">93</td>
+<td align="left">95%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">5</td>
+<td align="left">5%</td>
+</tr>
+<tr>
+<td align="left">Num.java</td>
+<td align="left">15</td>
+<td align="left">11</td>
+<td align="left">73%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">4</td>
+<td align="left">27%</td>
+</tr>
+<tr>
+<td align="left">Parser.java</td>
+<td align="left"><strong>144</strong></td>
+<td align="left"><strong>133</strong></td>
+<td align="left">92%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">11</td>
+<td align="left">8%</td>
+</tr>
+<tr>
+<td align="left">Poly.java</td>
+<td align="left"><strong>361</strong></td>
+<td align="left"><strong>337</strong></td>
+<td align="left">93%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">24</td>
+<td align="left">7%</td>
+</tr>
+<tr>
+<td align="left">SelectFactor.java</td>
+<td align="left">22</td>
+<td align="left">19</td>
+<td align="left">86%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">3</td>
+<td align="left">14%</td>
+</tr>
+<tr>
+<td align="left">Term.java</td>
+<td align="left">28</td>
+<td align="left">23</td>
+<td align="left">82%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">5</td>
+<td align="left">18%</td>
+</tr>
+<tr>
+<td align="left">TermKey.java</td>
+<td align="left">49</td>
+<td align="left">39</td>
+<td align="left">80%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">10</td>
+<td align="left">20%</td>
+</tr>
+<tr>
+<td align="left">Var.java</td>
+<td align="left">26</td>
+<td align="left">22</td>
+<td align="left">85%</td>
+<td align="left">0</td>
+<td align="left">0%</td>
+<td align="left">4</td>
+<td align="left">15%</td>
+</tr>
+<tr>
+<td align="left"><strong>总计 (Total)</strong></td>
+<td align="left"><strong>924</strong></td>
+<td align="left"><strong>831</strong></td>
+<td align="left"><strong>90%</strong></td>
+<td align="left"><strong>0</strong></td>
+<td align="left"><strong>0%</strong></td>
+<td align="left"><strong>93</strong></td>
+<td align="left"><strong>10%</strong></td>
+</tr>
+</tbody></table>
+<p>从代码规模量的度量结果可以看出，我的架构呈现出明显的中心化趋势.<code>Poly</code>和<code>Parser</code>代码规模远超其他类。这说明在迭代中，我为了快速实现功能，将多项式的加减乘、状压 DP、贪心压缩等逻辑全部揉进<code>Poly</code>类，使其出现了<strong>上帝类</strong>的倾向，内聚度有待提高。应当考虑将优化算法单独抽离为<code>Optimizer</code>类</p>
+<h3 id="面向对象经典度量"><a href="#面向对象经典度量" class="headerlink" title="面向对象经典度量"></a>面向对象经典度量</h3><table>
+<thead>
+<tr>
+<th align="left">类名 (Class)</th>
+<th align="left">类间耦合度 (CBO)</th>
+<th align="left">继承树深度 (DIT)</th>
+<th align="left">方法缺乏内聚度 (LCOM)</th>
+<th align="left">子类数量 (NOC)</th>
+<th align="left">类的响应数量 (RFC)</th>
+<th align="left">加权方法复杂度 (WMC)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">expr.DeriveFactor</td>
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">6</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">expr.ExpFactor</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">10</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Expr</td>
+<td align="left">8</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">9</td>
+<td align="left">4</td>
+</tr>
+<tr>
+<td align="left">expr.ExprFactor</td>
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">4</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Factor</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">1</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">expr.Num</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">4</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">expr.Poly</td>
+<td align="left"><strong>12</strong></td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left"><strong>64</strong></td>
+<td align="left"><strong>98</strong></td>
+</tr>
+<tr>
+<td align="left">expr.SelectFactor</td>
+<td align="left">3</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">4</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">expr.Term</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">12</td>
+<td align="left">5</td>
+</tr>
+<tr>
+<td align="left">expr.TermKey</td>
+<td align="left">6</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">14</td>
+<td align="left">9</td>
+</tr>
+<tr>
+<td align="left">expr.Var</td>
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">6</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">FuncFactor</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">6</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">Lexer</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">14</td>
+<td align="left">23</td>
+</tr>
+<tr>
+<td align="left">MainClass</td>
+<td align="left">5</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">26</td>
+<td align="left">18</td>
+</tr>
+<tr>
+<td align="left">Parser</td>
+<td align="left"><strong>12</strong></td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left"><strong>25</strong></td>
+<td align="left"><strong>42</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>总计 (Total)</strong></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"><strong>217</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>平均值 (Average)</strong></td>
+<td align="left">5.71</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">0.00</td>
+<td align="left">13.67</td>
+<td align="left">15.50</td>
+</tr>
+</tbody></table>
+<p><code>Poly</code>和<code>Parser</code>的耦合度都达到了全局最高的12，且<code>Poly</code>的类相应数量高达64。这表明在架构演进中，多项式运算引擎和语法解析器承载了过多的外部依赖和调用链路。虽然我的 LCOM 指标保持在极佳的 1，说明类的内部属性维护是高度一致的，但过高的外部耦合提醒我，在后续开发中应当引入类似工厂模式或接口分离，以降低核心类的通讯成本。</p>
+<h3 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h3><p><img src="/assets/images/ooUnit1.jpg" alt="alt text"></p>
+<p>我的架构主要分为三层。左侧是基于<code>Lexer</code>和<code>Parser</code>的解析链路，中间是自顶向下的AST树状结构，并通过在AST的每层节点上都实现toPoly方法以达到从字符串到抽象数据的转换，这样做的好处是，后续的所有计算可以通过poly类内部的计算完成，耦合性较低，架构缺陷是过于依赖<code>Poly</code>类，该类的复杂度较高。TermKey是Poly类中的特征信息，通过该类结合HashMap可以实现O（1）级别的查找操作。</p>
+<h3 id="设计考虑"><a href="#设计考虑" class="headerlink" title="设计考虑"></a>设计考虑</h3><p><code>MainClass</code>：主类，实现IO、空白字符替换和递归函数预求值，只完成最基本的操作与替换<br><code>Lexer</code>：词法分析器，将字符串拆分为一个个Token，并处理连续符号<br><code>Parser</code>：语法分析器，将Token序列利用递归下降法解析为AST<br><code>Expr</code>：表达式，维护所有项，规定所有表达式实现toPoly方法<br><code>Term</code>：项，维护每一项的符号和因子，实现toPoly方法，之所以将符号全部交给<code>Term</code>,是因为这样做可以只实现add方法，减轻<code>Poly</code>工作量<br><code>Factor</code>:因子接口，规定所有因子实现toPoly方法<br><code>Poly</code>：多项式运算引擎，实现多项式的加减乘除、求导、求值等操作<br><code>TermKey</code>：多项式特征信息，用于在HashMap中查找多项式<br><code>Num</code>：常数因子。AST 的最底层叶子节点，内部封装一个BigInteger存放精确数值，toPoly时直接返回一个常数多项式。<br><code>Var</code>：变量因子。记录自变量名称及其指数，在toPoly阶段负责将其转化为底层运算引擎可识别的标准幂函数多项式。<br><code>ExprFactor</code>：表达式因子。其内部包裹着一个<code>Expr</code>类对象。在toPoly时直接调用Expr的转换方法，解决了任意深度的括号嵌套问题。<br><code>ExpFactor</code>：指数因子。内部维护底部的表达式或因子，toPoly阶段负责构建带自然底数exp的数学模型，同时也是触发中、小规模数据“贪心与状压DP乘开优化”的入口。<br><code>DeriveFactor</code>：求导算子因子。保存求导目标变量（如dx,dy）及内部表达式，在AST转换为多项式的阶段，直接调用底层<code>Poly</code>的deriveX()或deriveY()，将求导操作转化为代数运算。<br><code>FuncFactor</code>：自定义函数调用因子。保存函数标识与实参列表，在解析或转换阶段负责完成实参向形参的映射与代入，配合主类的预处理实现函数的等价替换。<br><code>SelectFactor</code>：选择式因子。用于处理指导书中规定的条件求值与选择逻辑，通过解析内部的分支条件，在toPoly计算时动态返回正确的代数结果多项式。</p>
+<h2 id="架构设计体验"><a href="#架构设计体验" class="headerlink" title="架构设计体验"></a>架构设计体验</h2><p>在三次作业的迭代过程中，我的架构并没有经历性重构。这极大程度上得益于我在第一次作业就确立的AST解析前端与底层代数引擎完全分离的核心思想。</p>
+<p>在第一次作业中，我建立了标准的递归下降解析链路，通过<code>Lexer</code>和<code>Parser</code>将输入转化为由<code>Expr</code>、<code>Term</code>、<code>Factor</code>构成的抽象语法树(AST)。为了彻底剥离解析与计算的耦合，我设计了<code>Poly</code>类和<code>TermKey</code>类作为多项式的唯一代数运算载体，所有语法树节点最终都会通过调用自身的<code>toPoly</code>方法转化为底层数学模型。</p>
+<p>第二次作业引入了括号嵌套，在不改变任何原有架构的基础上，仅新增了<code>ExprFactor</code>节点。它在实现<code>Factor</code>接口的同时内部包裹一个<code>Expr</code>对象，调用<code>toPoly</code>时直接透传给内部表达式，用少量代码量实现了括号解析。</p>
+<p>第三次作业加入了求导算子和自定义函数。由于底层<code>Poly</code>引擎的代数封装较为合理，应对求导需求时，我只需在<code>Poly</code>内部扩展<code>deriveX</code>与<code>deriveY</code>方法，并在AST层面增加<code>DeriveFactor</code>节点即可，增加变量命则不得不修改Var类，使其维护一个变量名类，并对应修改TermKey。</p>
+<h3 id="新迭代情景与可扩展性分析：引入三角函数"><a href="#新迭代情景与可扩展性分析：引入三角函数" class="headerlink" title="新迭代情景与可扩展性分析：引入三角函数"></a>新迭代情景与可扩展性分析：引入三角函数</h3><p>全新的迭代需求：引入三角函数因子<code>sin(Factor)</code>与<code>cos(Factor)</code>，内部允许嵌套任意因子，并要求支持基本的合并与化简。<br>只需要新建<code>SinFactor</code>与<code>CosFactor</code>两个类并实现<code>Factor</code>接口。在词法分析阶段，让<code>Lexer</code>增加对<code>sin</code>和<code>cos</code>字符串的识别；在语法分析阶段，仅需在<code>Parser</code>的<code>parseFactor</code>方法中增加两个对应分支即可。<br>至于数学引擎的数据结构扩充，目前的<code>TermKey</code>类负责维护项的特征(如维护了<code>x</code>和<code>y</code>的指数)。为了支持三角函数嵌套，需在<code>TermKey</code>内部新增两个容器，例如<code>HashMap&lt;Poly, BigInteger&gt; sinMap</code>和<code>HashMap&lt;Poly, BigInteger&gt; cosMap</code>。这里的键设为<code>Poly</code>正好完美契合了三角函数内部可能嵌套任意复杂多项式表达式的需求，而值则代表该三角函数整体的指数。<br>在扩充了<code>TermKey</code>的数据结构后，需要重写<code>TermKey</code>的<code>equals</code>、<code>hashCode</code>以及<code>mul</code>方法，使其在合并同类项和相乘时，额外比对并合并<code>sinMap</code>和<code>cosMap</code>中的内容即可。最外层的<code>Poly</code>类不需要大幅度改动。</p>
+<h2 id="bug分析、测试策略与性能优化"><a href="#bug分析、测试策略与性能优化" class="headerlink" title="bug分析、测试策略与性能优化"></a>bug分析、测试策略与性能优化</h2><p>在本次作业中，程序的架构设计、性能优化与Bug的产生有紧密的联系。以下结合未通过的公测用例与互测情况，将程序的缺陷、优化过程及测试策略进行综合分析。</p>
+<h3 id="架构缺陷与-TLE-分析"><a href="#架构缺陷与-TLE-分析" class="headerlink" title="架构缺陷与 TLE 分析"></a>架构缺陷与 TLE 分析</h3><p>在第二次作业迭代中，为了加快开发进度，我起初并未将自定义函数抽象为独立的因子类，而是直接在 <code>MainClass</code> 中利用正则表达式进行全局的字符串预替换。这一设计在遇到 <code>SelectFactor</code>（选择式因子）时TLE了。选择式逻辑本应具备短路求值的特性，但全局字符串预替换强制展开了所有可能的分支，导致在多层嵌套和复杂条件判断下，计算量呈指数级爆炸。为解决此问题，我重构并抽象出了 <code>FuncFactor</code> 节点，将其推迟到 AST 转换为多项式时再按需进行实参代入，恢复了短路特性。</p>
+<p>此外，在处理深层嵌套表达式时，我还遇到了两处因缺失记忆化（缓存）导致的 TLE：</p>
+<ol>
+<li><code>toString</code> 缓存缺失：在多层嵌套的 AST 结构中，外层节点的 <code>toString</code> 频繁依赖内层节点的反复转化，产生大量冗余开销。后续我在各节点类中增加缓存字段，使重复转化降为 O(1) 复杂度。</li>
+<li>状压DP未记忆化：在为中、小规模多项式引入状态压缩DP进行乘开优化时，起初未对中间状态使用备忘录，导致相同子集划分被重复计算引发TLE，补充缓存机制后性能恢复正常。</li>
+</ol>
+<h3 id="优化引发的逻辑Bug与复杂度分析"><a href="#优化引发的逻辑Bug与复杂度分析" class="headerlink" title="优化引发的逻辑Bug与复杂度分析"></a>优化引发的逻辑Bug与复杂度分析</h3><p>为了将底层 DP 的拆分结果向上层组合，同时避免重新生成 AST 带来的代码臃肿，我尝试直接截获底层返回的字符串进行判断。初版实现中，我未加入 <code>!ans.contains(&quot;*e&quot;)</code> 等判定条件，导致在触发乘开优化后，外层少加了必要的包裹括号，直接破坏了表达式的等价性。</p>
+<p>修复该问题时，我采用了 <code>!ans.contains(&quot;*e&quot;)</code> 进行特征嗅探。但在互测中被发现，当测试数据合法包含乘法与自然底数时（例如 <code>exp((exp((2*exp(x)+3))))</code>），内层的 <code>2*exp(x)</code> 会导致嗅探器发生误判，错误地处理了外层括号。</p>
+<p>对比分析代码复杂度，未出现 Bug 的基础方法（如 <code>expr.Term.toPoly</code>）圈复杂度仅为 2-3，而承载优化逻辑的 <code>Poly.greedyCompress</code> 与 <code>Poly.buildExp</code> 最大圈复杂度（OCmax）分别达到 11 和 14。单纯的字符串包含匹配将树状层级关系压缩为了线性匹配，丢失了AST的深度信息，导致方法在遇到exp嵌套可乘开exp单因子的时候括号层数变多，性能下降。</p>
+<p>为降低复杂度并彻底解决问题，我引入了带有深度的单向扫描策略：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; ans.length() - <span class="number">1</span>; i++) &#123;</span><br><span class="line">    <span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> ans.charAt(i);</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="string">&#x27;(&#x27;</span>) &#123; index++; &#125;</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="string">&#x27;)&#x27;</span>) &#123; index--; &#125;</span><br><span class="line">    <span class="keyword">if</span> (index == <span class="number">0</span> &amp;&amp; c == <span class="string">&#x27;*&#x27;</span> &amp;&amp; ans.charAt(i + <span class="number">1</span>) == <span class="string">&#x27;e&#x27;</span>) &#123;</span><br><span class="line">        isFactor = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试策略与有效性"><a href="#测试策略与有效性" class="headerlink" title="测试策略与有效性"></a>测试策略与有效性</h2><p>在互测阶段，我主要通过自身的bug来构造测试用例：针对架构缺陷的定向测试：阅读他人代码时，重点关注其函数的解析方式与缓存机制，若发现对方采用全局字符串替换处理函数，便构造包含大量冗余分支的选择因子嵌套数据，测试其短路特性以诱发 TLE；若发现未见明显缓存，便构造深层级的exp(exp(…))嵌套数据测试其时间复杂度。 </p>
+<h2 id="AI使用策略"><a href="#AI使用策略" class="headerlink" title="AI使用策略"></a>AI使用策略</h2><p>在三次迭代中，我会将自己的架构抛给AI，并询问其改进意见，比如第一次作业中，多项式因子类是应该单独抽象出一个类还是复用expr等。另外，针对一些特定的优化算法，我如果不会实现，也不会照搬AI源码，而是学习构建思路以后自己重新复现一遍，因此并非出现直接使用AI源码的情况。</p>
+<p>除作业本身，在第一次和第二次作业的互测环节我均使用AI搭建了评测机，但是AI的数据构建效果并不好，不能有效地构造出bug。</p>
+<h2 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h2><p>经过本单元的学习，我深切体会到了递归方法的巧妙性和危险性，以后涉及递归使用的方法，我会注意其边界条件，并在必要时添加缓存以减少不必要的时间开销。另外，我意识到优化可能伴随一定的风险，每一步优化都要全面考虑其与本身架构的适配性。</p>
+<h2 id="未来方向"><a href="#未来方向" class="headerlink" title="未来方向"></a>未来方向</h2><p>希望辅导书能多给出一些架构提示和算法提示，鼓励同学进行合理的优化，并提醒同学一定要注意复杂度</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ztqs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2026/03/26/2026-3-26-unit1/">http://example.com/2026/03/26/2026-3-26-unit1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">123-Xiaotian's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/OOP/">OOP</a><a class="post-meta__tags" href="/tags/AST/">AST</a><a class="post-meta__tags" href="/tags/%E9%80%92%E5%BD%92%E4%B8%8B%E9%99%8D/">递归下降</a><a class="post-meta__tags" href="/tags/Java/">Java</a></div><div class="post-share"><div class="social-share" data-image="/img/hutao.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">操作系统 oslab0 实验报告</div></div><div class="info-2"><div class="info-item-1">lab0实验报告思考题Thinking 0.1Untracted.txt中的内容：位于分支 master 尚无提交 未跟踪的文件:  （使用 “git add &lt;文件&gt;…” 以包含要提交的内容）        README.txt        Untracted.txt Staged.txt中的内容：位于分支 master 尚无提交 要提交的变更：  （使用 “git rm –cached &lt;文件&gt;…” 以取消暂存）        新文件：   README.txt Modified.txt中的内容： 位于分支 master尚未暂存以备提交的变更：  （使用 “git add &lt;文件&gt;…” 更新要提交的内容）  （使用 “git restore &lt;文件&gt;…” 丢弃工作区的改动）        修改：     README.txt 结果不一样，第一次add的时候给出的是要提交的变更，第二次给出的是尚未暂存以备提交的变更，第二次必须得再add一次把修改添加到暂存区才能正确提交。 Thinking 0.2add the file 是 g...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/hutao.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ztqs</div><div class="author-info-description">h1w</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Unit1-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%A7%A3%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">Unit1 表达式解析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%BA%A6%E9%87%8F%E7%9A%84%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-number">1.1.</span> <span class="toc-text">基于度量的程序结构分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E7%BA%A7%E5%88%AB%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%BA%A6%E9%87%8F-Method-Complexity"><span class="toc-number">1.1.1.</span> <span class="toc-text">方法级别复杂度度量 (Method Complexity)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%84%E6%A8%A1%E5%BA%A6%E9%87%8F-Statistic"><span class="toc-number">1.1.2.</span> <span class="toc-text">代码规模度量 (Statistic)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BB%8F%E5%85%B8%E5%BA%A6%E9%87%8F"><span class="toc-number">1.1.3.</span> <span class="toc-text">面向对象经典度量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">1.1.4.</span> <span class="toc-text">架构图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E8%80%83%E8%99%91"><span class="toc-number">1.1.5.</span> <span class="toc-text">设计考虑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%BD%93%E9%AA%8C"><span class="toc-number">1.2.</span> <span class="toc-text">架构设计体验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E8%BF%AD%E4%BB%A3%E6%83%85%E6%99%AF%E4%B8%8E%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7%E5%88%86%E6%9E%90%EF%BC%9A%E5%BC%95%E5%85%A5%E4%B8%89%E8%A7%92%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">新迭代情景与可扩展性分析：引入三角函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bug%E5%88%86%E6%9E%90%E3%80%81%E6%B5%8B%E8%AF%95%E7%AD%96%E7%95%A5%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="toc-number">1.3.</span> <span class="toc-text">bug分析、测试策略与性能优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E7%BC%BA%E9%99%B7%E4%B8%8E-TLE-%E5%88%86%E6%9E%90"><span class="toc-number">1.3.1.</span> <span class="toc-text">架构缺陷与 TLE 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%BC%95%E5%8F%91%E7%9A%84%E9%80%BB%E8%BE%91Bug%E4%B8%8E%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90"><span class="toc-number">1.3.2.</span> <span class="toc-text">优化引发的逻辑Bug与复杂度分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%AD%96%E7%95%A5%E4%B8%8E%E6%9C%89%E6%95%88%E6%80%A7"><span class="toc-number">1.4.</span> <span class="toc-text">测试策略与有效性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AI%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5"><span class="toc-number">1.5.</span> <span class="toc-text">AI使用策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A"><span class="toc-number">1.6.</span> <span class="toc-text">心得体会</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AA%E6%9D%A5%E6%96%B9%E5%90%91"><span class="toc-number">1.7.</span> <span class="toc-text">未来方向</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/26/2026-3-26-unit1/" title="OOP Unit1 表达式解析">OOP Unit1 表达式解析</a><time datetime="2026-03-26T13:44:00.000Z" title="发表于 2026-03-26 21:44:00">2026-03-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告">操作系统 oslab0 实验报告</a><time datetime="2026-03-18T16:18:00.000Z" title="发表于 2026-03-19 00:18:00">2026-03-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/16/2025-12-16-P7/" title="P7流水线CPU架构设计">P7流水线CPU架构设计</a><time datetime="2025-12-15T17:57:00.000Z" title="发表于 2025-12-16 01:57:00">2025-12-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/03/2025-12-3-P6/" title="P6流水线CPU架构设计">P6流水线CPU架构设计</a><time datetime="2025-12-03T14:24:00.000Z" title="发表于 2025-12-03 22:24:00">2025-12-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/26/2025-11-26-P5/" title="P5流水线CPU架构设计">P5流水线CPU架构设计</a><time datetime="2025-11-26T13:27:00.000Z" title="发表于 2025-11-26 21:27:00">2025-11-26</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Ztqs</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

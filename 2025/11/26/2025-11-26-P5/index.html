@@ -1,0 +1,1316 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>P5流水线CPU架构设计 | 123-Xiaotian's Blog</title><meta name="author" content="Ztqs"><meta name="copyright" content="Ztqs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="verilog实现流水线CPU数据通路草图 设计概述通过对于P4的verilog代码进行重构，本CPU实现了支持10条指令的流水线CPU，该CPU支持延迟槽，将指令统一阻塞在D级。 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub  I型指令 算数&#x2F;位运算指令： ori,lui B类指令： beq, 访存指令： lw,sw  J型指令 jal,jr  空指令 nop  数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="P5流水线CPU架构设计">
+<meta property="og:url" content="http://example.com/2025/11/26/2025-11-26-P5/index.html">
+<meta property="og:site_name" content="123-Xiaotian&#39;s Blog">
+<meta property="og:description" content="verilog实现流水线CPU数据通路草图 设计概述通过对于P4的verilog代码进行重构，本CPU实现了支持10条指令的流水线CPU，该CPU支持延迟槽，将指令统一阻塞在D级。 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub  I型指令 算数&#x2F;位运算指令： ori,lui B类指令： beq, 访存指令： lw,sw  J型指令 jal,jr  空指令 nop  数">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/hutao.jpg">
+<meta property="article:published_time" content="2025-11-26T13:27:00.000Z">
+<meta property="article:modified_time" content="2026-03-30T13:41:06.442Z">
+<meta property="article:author" content="Ztqs">
+<meta property="article:tag" content="CO">
+<meta property="article:tag" content="CPU架构">
+<meta property="article:tag" content="MIPS">
+<meta property="article:tag" content="Verilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/hutao.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "P5流水线CPU架构设计",
+  "url": "http://example.com/2025/11/26/2025-11-26-P5/",
+  "image": "http://example.com/img/hutao.jpg",
+  "datePublished": "2025-11-26T13:27:00.000Z",
+  "dateModified": "2026-03-30T13:41:06.442Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ztqs",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/11/26/2025-11-26-P5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'P5流水线CPU架构设计',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" /><style> body, div, a, p, h1, h2, h3, h4, h5, h6 { font-family: "LXGW WenKai Screen", sans-serif !important; } </style><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/hutao1.jpg);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">123-Xiaotian's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">P5流水线CPU架构设计</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">P5流水线CPU架构设计</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-26T13:27:00.000Z" title="发表于 2025-11-26 21:27:00">2025-11-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-30T13:41:06.442Z" title="更新于 2026-03-30 21:41:06">2026-03-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90/">计算机组成</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="verilog实现流水线CPU"><a href="#verilog实现流水线CPU" class="headerlink" title="verilog实现流水线CPU"></a>verilog实现流水线CPU</h1><h2 id="数据通路草图"><a href="#数据通路草图" class="headerlink" title="数据通路草图"></a>数据通路草图</h2><p><img src="/assets/images/P5.jpg" alt="alt text"></p>
+<h2 id="设计概述"><a href="#设计概述" class="headerlink" title="设计概述"></a>设计概述</h2><p>通过对于P4的verilog代码进行重构，本CPU实现了支持10条指令的流水线CPU，该CPU支持延迟槽，将指令统一阻塞在D级。</p>
+<h2 id="实现指令说明"><a href="#实现指令说明" class="headerlink" title="实现指令说明"></a>实现指令说明</h2><h3 id="R型指令"><a href="#R型指令" class="headerlink" title="R型指令"></a>R型指令</h3><ul>
+<li>算数&#x2F;位运算指令：add,sub</li>
+</ul>
+<h3 id="I型指令"><a href="#I型指令" class="headerlink" title="I型指令"></a>I型指令</h3><ul>
+<li>算数&#x2F;位运算指令： ori,lui</li>
+<li>B类指令： beq,</li>
+<li>访存指令： lw,sw</li>
+</ul>
+<h3 id="J型指令"><a href="#J型指令" class="headerlink" title="J型指令"></a>J型指令</h3><ul>
+<li>jal,jr</li>
+</ul>
+<h3 id="空指令"><a href="#空指令" class="headerlink" title="空指令"></a>空指令</h3><ul>
+<li>nop</li>
+</ul>
+<h2 id="数据冒险"><a href="#数据冒险" class="headerlink" title="数据冒险"></a>数据冒险</h2><h3 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h3><p>从D级开始，计算我们所需指令的T_use和T_new，T_use中不需要用到新数据的地方我们填入infty，T_new中不产生新数据的地方我们填入0。这里sw是唯一一个产生新数据但T_new&#x3D;0的指令。</p>
+<table>
+<thead>
+<tr>
+<th align="center">op</th>
+<th align="center">T_use(rs)</th>
+<th align="center">T_use(rt)</th>
+<th align="center">T_new(D)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">add&#x2F;sub</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">sw</td>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">lw</td>
+<td align="center">1</td>
+<td align="center">infty</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">beq</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">lui</td>
+<td align="center">infty</td>
+<td align="center">infty</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">ori</td>
+<td align="center">1</td>
+<td align="center">infty</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">jal</td>
+<td align="center">infty</td>
+<td align="center">infty</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">jr</td>
+<td align="center">0</td>
+<td align="center">infty</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">nop</td>
+<td align="center">infty</td>
+<td align="center">infty</td>
+<td align="center">0</td>
+</tr>
+</tbody></table>
+<p>为正确阻塞，我们通过比较各级A3是否与D级指令相等且不为0，然后将T_use与T_new进行比较，将各级的rs，rt阻塞结果或起来，一旦有任意以及不满足条件就阻塞，实现了应阻塞尽阻塞</p>
+<h3 id="转发"><a href="#转发" class="headerlink" title="转发"></a>转发</h3><p>在D,E,M级，我们分别设置了从E到D，从M到D，从W到D和从M到E，从W到E和从W到M级的转发，我们分别给出E,M，W级时，各个指令的T_new情况,不产生新数据的指令省略</p>
+<table>
+<thead>
+<tr>
+<th align="center">op</th>
+<th align="center">T_new(E)</th>
+<th align="center">T_new(M)</th>
+<th align="center">T_new(W)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">add&#x2F;sub</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">lw</td>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">lui</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">ori</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">jal</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody></table>
+<p>由表可知，W级的所有结果都是可以被各级接受的，在D级，我们能接受来自jal指令E级的结果，能接受jal指令和ALUrs在M级的结果以及所有指令来自W级的结果。在E级，能接受来自jal和ALUrs来及M级的结果和所有来自W级的结构，M级只能接受来自W级的结果。</p>
+<h2 id="功能模块定义"><a href="#功能模块定义" class="headerlink" title="功能模块定义"></a>功能模块定义</h2><p>这里仅给出更改了模块内容的模块定义：</p>
+<h3 id="IFU（取指模块）"><a href="#IFU（取指模块）" class="headerlink" title="IFU（取指模块）"></a>IFU（取指模块）</h3><ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">信号名</th>
+<th align="center">方向</th>
+<th align="center">位宽</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">clk</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">时钟信号</td>
+</tr>
+<tr>
+<td align="center">reset</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">异步复位信号</td>
+</tr>
+<tr>
+<td align="center">stall</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">阻塞信号</td>
+</tr>
+<tr>
+<td align="center">next</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">下一条要被执行的指令的地址</td>
+</tr>
+<tr>
+<td align="center">pc</td>
+<td align="center">O</td>
+<td align="center">32</td>
+<td align="center">正在执行的指令的地址</td>
+</tr>
+<tr>
+<td align="center">Instr</td>
+<td align="center">O</td>
+<td align="center">32</td>
+<td align="center">正在执行的指令</td>
+</tr>
+</tbody></table>
+<ul>
+<li>功能定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>功能名称</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>复位</td>
+<td>reset信号有效时，将PC寄存器中的值置为0x00003000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>阻塞</td>
+<td>stall信号有效时，PC寄存器忽略时钟输入，PC当前值不变</td>
+</tr>
+<tr>
+<td>3</td>
+<td>写PC寄存器</td>
+<td>当stop信号失效且clk上升沿来临时，将下一条指令的地址写入PC寄存器</td>
+</tr>
+<tr>
+<td>4</td>
+<td>取指令</td>
+<td>根据当前PC的值从ROM(IM)中读出对应的指令到Instr端口</td>
+</tr>
+</tbody></table>
+<h3 id="ALU-算数逻辑单元"><a href="#ALU-算数逻辑单元" class="headerlink" title="ALU (算数逻辑单元)"></a>ALU (算数逻辑单元)</h3><p>该模块对各个命令进行相应的计算，并将计算结果输出（删除了equal比较结果进行分支早判）</p>
+<ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">信号名</th>
+<th align="center">方向</th>
+<th align="center">位宽</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">num1</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">运算数1</td>
+</tr>
+<tr>
+<td align="center">num2</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">运算数2</td>
+</tr>
+<tr>
+<td align="center">ALUOp</td>
+<td align="center">I</td>
+<td align="center">4</td>
+<td align="center">运算种类符</td>
+</tr>
+<tr>
+<td align="center">ALUrs</td>
+<td align="center">O</td>
+<td align="center">32</td>
+<td align="center">运算结果</td>
+</tr>
+</tbody></table>
+<ul>
+<li>功能定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>功能名称</th>
+<th>ALUop</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>加</td>
+<td>4’b0000</td>
+<td>ALUrs &#x3D; num1 + num2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>减</td>
+<td>4’b0001</td>
+<td>ALUrs &#x3D; num1 - num2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>或</td>
+<td>4’b0010</td>
+<td>ALUrs &#x3D; num1 | num2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>lui</td>
+<td>4’b0011</td>
+<td>ALUrs &#x3D; num2 &lt;&lt; 16</td>
+</tr>
+</tbody></table>
+<h3 id="Controller-控制器"><a href="#Controller-控制器" class="headerlink" title="Controller (控制器)"></a>Controller (控制器)</h3><p>本模块中，我们通过Add逻辑对OpCode和Funct进行解码，并通过或逻辑输出了RegDst等共9条控制指令，同时输出了ALUOp作为ALU运算种类的选择。增加了rsT_use,rtT_use,T_new指令的输出，便于阻塞逻辑判断。</p>
+<ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">信号名</th>
+<th align="center">方向</th>
+<th align="center">位宽</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">funct</td>
+<td align="center">I</td>
+<td align="center">6</td>
+<td align="center">funct域</td>
+</tr>
+<tr>
+<td align="center">op</td>
+<td align="center">I</td>
+<td align="center">6</td>
+<td align="center">opcode域</td>
+</tr>
+<tr>
+<td align="center">RegDst</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">0:grf从rt写入 1:grf从rd写入</td>
+</tr>
+<tr>
+<td align="center">ALUSrc</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">ALU的num2来自 0:RD2  1:扩展后的立即数</td>
+</tr>
+<tr>
+<td align="center">RegWrite</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">grf写使能信号</td>
+</tr>
+<tr>
+<td align="center">ExtOp</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">Ext的扩展类型 0:0扩展 1:符号扩展</td>
+</tr>
+<tr>
+<td align="center">MemToReg</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">grf的写入数据来自 0：ALU计算结果 1：Mem</td>
+</tr>
+<tr>
+<td align="center">MemWrite</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">Mem写使能信号</td>
+</tr>
+<tr>
+<td align="center">Branch</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">1代表是分支指令</td>
+</tr>
+<tr>
+<td align="center">Jal</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">Jal指令信号</td>
+</tr>
+<tr>
+<td align="center">Jr</td>
+<td align="center">O</td>
+<td align="center">1</td>
+<td align="center">Jr指令信号</td>
+</tr>
+<tr>
+<td align="center">ALUOp</td>
+<td align="center">O</td>
+<td align="center">4</td>
+<td align="center">ALU操作数</td>
+</tr>
+<tr>
+<td align="center">rsT_use</td>
+<td align="center">O</td>
+<td align="center">2</td>
+<td align="center">该指令最早经过几拍需要使用rs寄存器</td>
+</tr>
+<tr>
+<td align="center">rtT_use</td>
+<td align="center">O</td>
+<td align="center">2</td>
+<td align="center">该指令最早经过几拍需要使用rt寄存器</td>
+</tr>
+<tr>
+<td align="center">T_new</td>
+<td align="center">O</td>
+<td align="center">2</td>
+<td align="center">该指令最早经过几拍产生新结果</td>
+</tr>
+</tbody></table>
+<ul>
+<li>控制信号定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">信号名</th>
+<th align="center">触发指令</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">RegDst</td>
+<td align="center">add,sub</td>
+<td align="center">0:grf从rt写入 1:grf从rd写入</td>
+</tr>
+<tr>
+<td align="center">ALUSrc</td>
+<td align="center">ori,lw,sw,lui</td>
+<td align="center">ALU的num2来自 0:RD2  1:扩展后的立即数</td>
+</tr>
+<tr>
+<td align="center">RegWrite</td>
+<td align="center">add,sub,ori,lw,lui</td>
+<td align="center">grf写使能信号</td>
+</tr>
+<tr>
+<td align="center">ExtOp</td>
+<td align="center">lw,sw,beq</td>
+<td align="center">Ext的扩展类型 0:0扩展 1:符号扩展</td>
+</tr>
+<tr>
+<td align="center">MToR</td>
+<td align="center">lw</td>
+<td align="center">grf的写入数据来自 0：ALU计算结果 1：Mem</td>
+</tr>
+<tr>
+<td align="center">MemWrite</td>
+<td align="center">sw</td>
+<td align="center">em写使能信号</td>
+</tr>
+<tr>
+<td align="center">Branch</td>
+<td align="center">beq</td>
+<td align="center">1代表是分支指令</td>
+</tr>
+<tr>
+<td align="center">Jal</td>
+<td align="center">jal</td>
+<td align="center">1表示grf写入31号寄存器，写入内容来自pc，同时1表示NPC的next来自Addr</td>
+</tr>
+<tr>
+<td align="center">Jr</td>
+<td align="center">jr</td>
+<td align="center">1表示NPC的next来自rd1读出的Addr</td>
+</tr>
+</tbody></table>
+<h3 id="NPC-指令转移器"><a href="#NPC-指令转移器" class="headerlink" title="NPC (指令转移器)"></a>NPC (指令转移器)</h3><p>该模块实现了对于PC指令转移的的逻辑，针对一般指令和B类指令设置了不同的计算逻辑。并通过外部Branch信号选择NPC的值。由于NPC位于D级会导致所有指令执行两拍，我同时将IF_pc和ID_pc传入该模块进行计算。</p>
+<ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">信号名</th>
+<th align="center">方向</th>
+<th align="center">位宽</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">PC</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">IF_pc</td>
+</tr>
+<tr>
+<td align="center">ID_pc</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">ID_pc</td>
+</tr>
+<tr>
+<td align="center">offset</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">扩展后的地址偏移</td>
+</tr>
+<tr>
+<td align="center">JAddr</td>
+<td align="center">I</td>
+<td align="center">32</td>
+<td align="center">J指令跳转地址</td>
+</tr>
+<tr>
+<td align="center">Branch</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">0:PC+4 1：PC+4+偏移</td>
+</tr>
+<tr>
+<td align="center">Jal</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">NPC来自JAddr</td>
+</tr>
+<tr>
+<td align="center">Jr</td>
+<td align="center">I</td>
+<td align="center">1</td>
+<td align="center">NPC来自JAddr</td>
+</tr>
+<tr>
+<td align="center">NPC</td>
+<td align="center">O</td>
+<td align="center">32</td>
+<td align="center">PC下一条指令地址</td>
+</tr>
+</tbody></table>
+<ul>
+<li>功能定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>功能名称</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>指令转移</td>
+<td>对指令地址进行计算并转移</td>
+</tr>
+</tbody></table>
+<h2 id="流水线寄存器定义"><a href="#流水线寄存器定义" class="headerlink" title="流水线寄存器定义"></a>流水线寄存器定义</h2><h3 id="FD-reg-D级流水线寄存器"><a href="#FD-reg-D级流水线寄存器" class="headerlink" title="FD_reg(D级流水线寄存器)"></a>FD_reg(D级流水线寄存器)</h3><table>
+<thead>
+<tr>
+<th align="left">方向</th>
+<th align="left">信号名</th>
+<th align="left">位宽</th>
+<th align="left">描述</th>
+<th align="left">输入来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">I</td>
+<td align="left">clk</td>
+<td align="left">1</td>
+<td align="left">时钟信号</td>
+<td align="left">mips.v中的clk</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">reset</td>
+<td align="left">1</td>
+<td align="left">同步复位信号</td>
+<td align="left">mips.v中的reset</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">stall</td>
+<td align="left">1</td>
+<td align="left">阻塞信号</td>
+<td align="left">HCU中的stall信号</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">IF_Instr</td>
+<td align="left">32</td>
+<td align="left">IF阶段指令输入</td>
+<td align="left">IFU的输出指令</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">IF_pc</td>
+<td align="left">32</td>
+<td align="left">IF阶段PC值输入</td>
+<td align="left">IFU的输出PC</td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">ID_Instr</td>
+<td align="left">32</td>
+<td align="left">ID阶段指令输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">ID_pc</td>
+<td align="left">32</td>
+<td align="left">ID阶段PC值输出</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h3 id="DE-reg-E级流水线寄存器"><a href="#DE-reg-E级流水线寄存器" class="headerlink" title="DE_reg(E级流水线寄存器)"></a>DE_reg(E级流水线寄存器)</h3><ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">方向</th>
+<th align="left">信号名</th>
+<th align="left">位宽</th>
+<th align="left">描述</th>
+<th align="left">输入来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">I</td>
+<td align="left">clk</td>
+<td align="left">1</td>
+<td align="left">时钟信号</td>
+<td align="left">mips.v中的clk</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">reset</td>
+<td align="left">1</td>
+<td align="left">同步复位信号</td>
+<td align="left">mips.v中的reset</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">stall</td>
+<td align="left">1</td>
+<td align="left">阻塞信号</td>
+<td align="left">HCU中的stall信号</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_ALUSrc</td>
+<td align="left">1</td>
+<td align="left">ALU源操作数选择信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_MemWrite</td>
+<td align="left">1</td>
+<td align="left">存储器写使能信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_T_new</td>
+<td align="left">2</td>
+<td align="left">结果生成周期信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_ALUOp</td>
+<td align="left">3</td>
+<td align="left">ALU运算类型选择信号</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_rs</td>
+<td align="left">5</td>
+<td align="left">rs寄存器地址</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_rt</td>
+<td align="left">5</td>
+<td align="left">rt寄存器地址</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_rd1</td>
+<td align="left">32</td>
+<td align="left">rs寄存器读出数据</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_rd2</td>
+<td align="left">32</td>
+<td align="left">rt寄存器读出数据</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">ID_Eimm</td>
+<td align="left">32</td>
+<td align="left">扩展后立即数</td>
+<td align="left">ID阶段输出</td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_ALUSrc</td>
+<td align="left">1</td>
+<td align="left">ALU源操作数选择信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_MemWrite</td>
+<td align="left">1</td>
+<td align="left">存储器写使能信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_T_new</td>
+<td align="left">2</td>
+<td align="left">更新后结果生成周期信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_ALUOp</td>
+<td align="left">3</td>
+<td align="left">ALU运算类型选择信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_rs</td>
+<td align="left">5</td>
+<td align="left">rs寄存器地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_rt</td>
+<td align="left">5</td>
+<td align="left">rt寄存器地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_rd1</td>
+<td align="left">32</td>
+<td align="left">rs寄存器读出数据输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_rd2</td>
+<td align="left">32</td>
+<td align="left">rt寄存器读出数据输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">EX_Eimm</td>
+<td align="left">32</td>
+<td align="left">扩展后立即数输出</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h3 id="EM-reg-M级流水线寄存器"><a href="#EM-reg-M级流水线寄存器" class="headerlink" title="EM_reg(M级流水线寄存器)"></a>EM_reg(M级流水线寄存器)</h3><ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">方向</th>
+<th align="left">信号名</th>
+<th align="left">位宽</th>
+<th align="left">描述</th>
+<th align="left">输入来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">I</td>
+<td align="left">clk</td>
+<td align="left">1</td>
+<td align="left">时钟信号</td>
+<td align="left">mips.v中的clk</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">reset</td>
+<td align="left">1</td>
+<td align="left">同步复位信号</td>
+<td align="left">mips.v中的reset</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_MemWrite</td>
+<td align="left">1</td>
+<td align="left">存储器写使能信号</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_T_new</td>
+<td align="left">3</td>
+<td align="left">结果生成周期信号</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_rt</td>
+<td align="left">5</td>
+<td align="left">rt寄存器地址</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_ALUrs</td>
+<td align="left">32</td>
+<td align="left">ALU运算结果</td>
+<td align="left">EX阶段ALU输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">EX_rd2</td>
+<td align="left">32</td>
+<td align="left">rt寄存器读出数据</td>
+<td align="left">EX阶段输出</td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_MemWrite</td>
+<td align="left">1</td>
+<td align="left">存储器写使能信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_T_new</td>
+<td align="left">3</td>
+<td align="left">更新后结果生成周期信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_rt</td>
+<td align="left">5</td>
+<td align="left">rt寄存器地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_ALUrs</td>
+<td align="left">32</td>
+<td align="left">ALU运算结果输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">MEM_rd2</td>
+<td align="left">32</td>
+<td align="left">rt寄存器读出数据输出</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h3 id="MW-reg-W级流水线寄存器"><a href="#MW-reg-W级流水线寄存器" class="headerlink" title="MW_reg(W级流水线寄存器)"></a>MW_reg(W级流水线寄存器)</h3><ul>
+<li>端口定义</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">方向</th>
+<th align="left">信号名</th>
+<th align="left">位宽</th>
+<th align="left">描述</th>
+<th align="left">输入来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">I</td>
+<td align="left">clk</td>
+<td align="left">1</td>
+<td align="left">时钟信号</td>
+<td align="left">mips.v中的clk</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">reset</td>
+<td align="left">1</td>
+<td align="left">同步复位信号</td>
+<td align="left">mips.v中的reset</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_T_new</td>
+<td align="left">3</td>
+<td align="left">结果生成周期信号</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_ALUrs</td>
+<td align="left">32</td>
+<td align="left">ALU运算结果</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_Mem</td>
+<td align="left">32</td>
+<td align="left">存储器读出数据</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">I</td>
+<td align="left">MEM_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值</td>
+<td align="left">MEM阶段输出</td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_Jal</td>
+<td align="left">1</td>
+<td align="left">Jal指令标记信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_RegWrite</td>
+<td align="left">1</td>
+<td align="left">GRF写使能信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_MemToReg</td>
+<td align="left">1</td>
+<td align="left">GRF写数据来源选择信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_T_new</td>
+<td align="left">3</td>
+<td align="left">更新后结果生成周期信号输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_A3</td>
+<td align="left">5</td>
+<td align="left">GRF写地址输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_ALUrs</td>
+<td align="left">32</td>
+<td align="left">ALU运算结果输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_Mem</td>
+<td align="left">32</td>
+<td align="left">存储器读出数据输出</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">O</td>
+<td align="left">WB_pc</td>
+<td align="left">32</td>
+<td align="left">当前指令PC值输出</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h2 id="测试方案"><a href="#测试方案" class="headerlink" title="测试方案"></a>测试方案</h2><h3 id="运算类指令测试"><a href="#运算类指令测试" class="headerlink" title="运算类指令测试"></a>运算类指令测试</h3><p>先将0和边界值附近的值通过lui和ori加载到3到15号寄存器中，再进行运算测试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">ori $0,$0,0xfffc </span><br><span class="line">ori $1,$0,0x0004  #$1=4</span><br><span class="line">lui $2,0xffff</span><br><span class="line">ori $2,$2,0xfffc  #$2=-4</span><br><span class="line">lui $3,0x8000</span><br><span class="line">ori $3,$3,0x0000  #$3=-2147483648</span><br><span class="line">lui $4,0x8000</span><br><span class="line">ori $4,$4,0x0001  #$4=-2147483647</span><br><span class="line">lui $5,0x8000</span><br><span class="line">ori $5,$5,0x0002  #$5=-2147483646</span><br><span class="line">lui $6,0x7fff</span><br><span class="line">ori $6,$6,0xffff  #$6=2147483647</span><br><span class="line">lui $7,0x7fff</span><br><span class="line">ori $7,$7,0xfffe  #$7=2147483646</span><br><span class="line">lui $8,0x7fff</span><br><span class="line">ori $8,$8,0xfffd  #$8=2147483645</span><br><span class="line">ori $9,$9,0x0000  #$9=0</span><br><span class="line">ori $10,$10,0x0001 #$10=1</span><br><span class="line">ori $11,$11,0x0002 #$11=2</span><br><span class="line">ori $12,$12,0xffff #$12=-1</span><br><span class="line">ori $13,$13,0xfffe #$13=-2</span><br><span class="line">lui $14,0x1234</span><br><span class="line">ori $14,$14,0x5678 #$14=0x12345678</span><br><span class="line">lui $15,0x8000</span><br><span class="line">ori $15,$15,0x8000 #$15=-2147155840</span><br><span class="line"></span><br><span class="line">add $16,$3,$6 #- +</span><br><span class="line">add $17,$6,$7 #+ + overflow</span><br><span class="line">add $18,$8,$10#+ +</span><br><span class="line">add $19,$4,$5 #- - overflow</span><br><span class="line">add $20,$13,$5#- -</span><br><span class="line">add $21,$6,$4 #+ -</span><br><span class="line">add $22,$7,$9 #+ 0</span><br><span class="line">add $23,$9,$2 #0 -</span><br><span class="line">sw  $16,0($0) #base 0 offset 0</span><br><span class="line">sw  $17,4($0) #+ 0</span><br><span class="line">sw  $18,-4($1)#- +</span><br><span class="line">sw  $19,56($2)#+ -</span><br><span class="line">sw  $20,16($1)#+ +</span><br><span class="line">lw  $21,0($0) #base 0 offset 0</span><br><span class="line">lw  $22,4($0) #+ 0</span><br><span class="line">lw  $23,-4($1)#- +</span><br><span class="line">lw  $24,56($2)#+ -</span><br><span class="line">lw  $25,16($1)#+ +</span><br><span class="line"></span><br><span class="line">sub $16,$6,$3 #+ - overflow</span><br><span class="line">sub $17,$3,$6 #- + overflow</span><br><span class="line">sub $18,$6,$7 #+ -</span><br><span class="line">sub $19,$4,$5 #- -</span><br><span class="line">sub $20,$9,$12 #0 - -</span><br><span class="line">sub $21,$10,$11 #+ -</span><br><span class="line">sub $22,$12,$9 #- - 0</span><br><span class="line">sub $23,$8,$10 #+ -</span><br><span class="line">sub $24,$15,$4 #- -</span><br><span class="line">nop</span><br><span class="line"></span><br><span class="line">sw  $16,20($0) #base 0 offset +20</span><br><span class="line">sw  $17,24($0) #+ 0</span><br><span class="line">sw  $18,-8($1) #- +</span><br><span class="line">sw  $19,60($2) #+ -</span><br><span class="line">sw  $20,28($1) #+ +</span><br><span class="line">nop</span><br><span class="line"></span><br><span class="line">lw  $21,20($0) #base 0 offset +20</span><br><span class="line">lw  $22,24($0) #+ 0</span><br><span class="line">lw  $23,-8($1) #- +</span><br><span class="line">lw  $24,60($2) #+ -</span><br><span class="line">lw  $25,28($1) #+ +</span><br><span class="line">nop</span><br></pre></td></tr></table></figure>
+
+<h3 id="B类指令测试"><a href="#B类指令测试" class="headerlink" title="B类指令测试"></a>B类指令测试</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">lui $3,0x8000</span><br><span class="line">ori $3,$3,0x0000  #$3=-2147483648</span><br><span class="line">lui $4,0x8000</span><br><span class="line">ori $4,$4,0x0001  #$4=-2147483647</span><br><span class="line">lui $5,0x8000</span><br><span class="line">ori $5,$5,0x0001  #$5=-2147483647</span><br><span class="line">lui $6,0x7fff</span><br><span class="line">ori $6,$6,0xffff  #$6=2147483647</span><br><span class="line">lui $7,0x7fff</span><br><span class="line">ori $7,$7,0xfffe  #$7=2147483646</span><br><span class="line">lui $8,0x7fff</span><br><span class="line">ori $8,$8,0xfffd  #$8=2147483645</span><br><span class="line">lui $9,0x7fff</span><br><span class="line">ori $9,$9,0xfffe  #$9=2147483646</span><br><span class="line">lui $10,0x7fff</span><br><span class="line">ori $10,$10,0xfffd  #$10=2147483645</span><br><span class="line"></span><br><span class="line">test1:</span><br><span class="line">beq $7,$9,test2  #jump to after</span><br><span class="line">nop</span><br><span class="line">test4:</span><br><span class="line">beq $8,$10,test5 #jump to after</span><br><span class="line">nop</span><br><span class="line">test2:</span><br><span class="line">beq $3,$4,test2  #dont jump to itself</span><br><span class="line">nop</span><br><span class="line">test3:</span><br><span class="line">beq $9,$10,test1 #dont jump to before</span><br><span class="line">nop</span><br><span class="line">test6:</span><br><span class="line">beq $4,$5,test4  #jump to before</span><br><span class="line">nop</span><br><span class="line">test5:</span><br><span class="line">beq $4,$6,test7  #dont jump to after</span><br><span class="line">nop </span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">test7:</span><br><span class="line">beq $4,$5,test7  #jump to itself</span><br></pre></td></tr></table></figure>
+
+<h3 id="J类指令测试"><a href="#J类指令测试" class="headerlink" title="J类指令测试"></a>J类指令测试</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">ori $sp,$sp,0x2ffc</span><br><span class="line">lui $3,0x8000</span><br><span class="line">ori $3,$3,0x0000  # $3 = -2147483648</span><br><span class="line">lui $4,0x8000</span><br><span class="line">ori $4,$4,0x1000  # $4 = $3 + 1000</span><br><span class="line">lui $5,0x7fff</span><br><span class="line">ori $5,$5,0xffff  # $5 = 2147483647</span><br><span class="line">lui $6,0x7fff</span><br><span class="line">ori $6,$6,0xfffe  # $6 = 2147483646</span><br><span class="line">lui $7,0x0000</span><br><span class="line">ori $7,$7,0x1234  # $7 = 0x1234</span><br><span class="line">lui $8,0xffff</span><br><span class="line">ori $8,$8,0xffff  # $8 = -1</span><br><span class="line">lui $9,0x0000</span><br><span class="line">ori $9,$9,0x0000  # $9 = 0</span><br><span class="line"></span><br><span class="line">tomain:</span><br><span class="line">add $11,$10,$9</span><br><span class="line">beq $11,$0,main</span><br><span class="line"></span><br><span class="line">test_self:</span><br><span class="line">sub $3,$3,$8        </span><br><span class="line">beq $3,$4,exit      </span><br><span class="line">jal test_self               </span><br><span class="line"></span><br><span class="line">test_forward:</span><br><span class="line">sw $ra,0($0)</span><br><span class="line">jal forward  </span><br><span class="line">lw $ra,0($0)  </span><br><span class="line">jr $ra   </span><br><span class="line">           </span><br><span class="line">forward:</span><br><span class="line">add $10, $3, $8     </span><br><span class="line">jr $ra            </span><br><span class="line"></span><br><span class="line">backward:</span><br><span class="line">add $11, $10, $8     </span><br><span class="line">jr $ra                </span><br><span class="line">test_backward:</span><br><span class="line">sw $ra,4($0)</span><br><span class="line">jal backward</span><br><span class="line">lw $ra,4($0)          </span><br><span class="line">jr $ra               </span><br><span class="line"></span><br><span class="line">main:</span><br><span class="line">jal test_forward      </span><br><span class="line">jal test_backward     </span><br><span class="line">jal test_self         </span><br><span class="line"></span><br><span class="line">exit:</span><br><span class="line">nop  </span><br></pre></td></tr></table></figure>
+
+<h3 id="指令转发与阻塞联动测试"><a href="#指令转发与阻塞联动测试" class="headerlink" title="指令转发与阻塞联动测试"></a>指令转发与阻塞联动测试</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">ori $1,$1,0x0001</span><br><span class="line">ori $2,$2,0x0002</span><br><span class="line">ori $3,$3,0x0003</span><br><span class="line">ori $9,$9,0x0000  #$9=0</span><br><span class="line">ori $10,$10,0x0001 #$10=1</span><br><span class="line">ori $11,$11,0x0002 #$11=2</span><br><span class="line">ori $12,$12,0xffff #$12=-1</span><br><span class="line">ori $13,$13,0xfffe #$13=-2</span><br><span class="line">ori $14,$14,0x0004 #$14=4</span><br><span class="line">ori $15,$15,0x0008 #$15=8</span><br><span class="line">ori $16,$16,0x000c #$16=12</span><br><span class="line">EX2ID:</span><br><span class="line">jal JR</span><br><span class="line">add $31,$31,$0 #$31+0</span><br><span class="line">add $5,$4,$31</span><br><span class="line">beq $1,$10,MEM2ID</span><br><span class="line">sub $6,$5,$2 #$6=$5-2</span><br><span class="line">JR:</span><br><span class="line">jr $ra</span><br><span class="line">nop</span><br><span class="line">MEM2ID:</span><br><span class="line">jal JR1</span><br><span class="line">nop</span><br><span class="line">add $7,$6,$31</span><br><span class="line">beq $7,$6,WA #stall=&gt;MEM2ID</span><br><span class="line">lui $8,0x1111</span><br><span class="line">beq $7,$8,WA</span><br><span class="line">ori $9,$9,0x0001</span><br><span class="line">beq $9,$1,WB2ID</span><br><span class="line">nop</span><br><span class="line">JR1:</span><br><span class="line">jr $ra</span><br><span class="line">nop</span><br><span class="line">WB2ID:</span><br><span class="line">jal JR2</span><br><span class="line">sw $1,0($14)</span><br><span class="line">lw $10,0($20) #MEM2EX</span><br><span class="line">beq $2,$10,WA</span><br><span class="line">sub $4,$2,$1</span><br><span class="line">nop</span><br><span class="line">nop</span><br><span class="line">beq $4,$1,MEM2EX</span><br><span class="line">JR2:</span><br><span class="line">nop</span><br><span class="line">jr $ra</span><br><span class="line">add $20,$0,$14</span><br><span class="line">MEM2EX:</span><br><span class="line">add $5,$1,$2</span><br><span class="line">sub $6,$5,$1</span><br><span class="line">ori $7,$6,0xffff</span><br><span class="line">lui $7,0x7fff</span><br><span class="line">sub $8,$7,$1</span><br><span class="line">WB2EX:</span><br><span class="line">add $5,$1,$2</span><br><span class="line">nop</span><br><span class="line">sub $6,$5,$1</span><br><span class="line">nop</span><br><span class="line">ori $7,$6,0xffff</span><br><span class="line">lui $7,0x7fff</span><br><span class="line">nop</span><br><span class="line">sub $8,$7,$1</span><br><span class="line">nop</span><br><span class="line">sw $3,0($15)</span><br><span class="line">lw $9,0($15)</span><br><span class="line">nop</span><br><span class="line">add $10,$1,$9</span><br><span class="line">WB2MEM:</span><br><span class="line">sw $10,0($16)</span><br><span class="line">ori $5,$1,0x0005</span><br><span class="line">sw $5,0($15)</span><br><span class="line">stall:</span><br><span class="line">add $17,$4,$5</span><br><span class="line">beq $1,$17,WA</span><br><span class="line">lw  $18,0($15)</span><br><span class="line">beq $1,$18,WA</span><br><span class="line">nop</span><br><span class="line">beq $1,$1,END</span><br><span class="line">WA:</span><br><span class="line">ori $20,0xffff</span><br><span class="line">lui $20,0xffff</span><br><span class="line">END:</span><br><span class="line">nop</span><br></pre></td></tr></table></figure>
+
+<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>Q：我们使用提前分支判断的方法尽早产生结果来减少因不确定而带来的开销，但实际上这种方法并非总能提高效率，请从流水线冒险的角度思考其原因并给出一个指令序列的例子。</p>
+<p>A:分支早判将分支判断提早到D级，这一操作导致分支指令进入D级后立刻就需要使用rs，rt级的数据，这导致一旦分支指令与前序lw等需要过2~3拍才能产生新数据的指令产生数据冲突的时候，就一定会导致阻塞</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    lw $1,0($3)</span><br><span class="line">    add $2,$2,$3;</span><br><span class="line">loop：</span><br><span class="line">    beq $1,$2,loop_end</span><br><span class="line">    ori $3,$3,0x0001</span><br><span class="line">    lui $4,$4,0xffff</span><br><span class="line">    add $1,$1,$3</span><br><span class="line">    jal loop</span><br><span class="line">loop_end:</span><br></pre></td></tr></table></figure>
+
+<p>如上述指令所示，由于分支早判，运行到beq的时候必定会产生一拍的阻塞，但如果beq在E级执行，则无需阻塞，当然，在实现延迟槽以后，D级判断可以保证没有需要冲刷的指令，但如果出现若干个上述指令块且每一个指令块都无需跳转，D级判断就会产生很多阻塞开销，</p>
+<p>Q：因为延迟槽的存在，对于 jal 等需要将指令地址写入寄存器的指令，要写回 PC + 8，请思考为什么这样设计？</p>
+<p>A：延迟槽的存在，保证了jal指令后的延迟槽指令一定会被执行，所以用jr跳转回后，在程序员视角，延迟槽指令不应该再次被执行，所以应当跳转到jal后的第2条指令的地址，也即pc+8</p>
+<p>Q:我们要求所有转发数据都来源于流水寄存器而不能是功能部件（如 DM、ALU），请思考为什么？</p>
+<p>A：首先，虽然流水线寄存器间的计算如ALU，Branch判断，Jal指令地址计算等操作都是组合逻辑，但实际上这个计算还是有一定的时间延迟的，假如将ALU指令的输出结果直接转发到D级，那么相当于一个时钟周期内，需要等ALU计算和后续计算这两个计算过程，这样就必定会导致流水线的时钟周期的延长，这种开销最终会作用在所有模块的计算中。其次，当我们需要M级到E级的转发的时候，如果将本来来及M级寄存器的数据换成来自ALU的数据，相当于从ALU的结果拿过来作为ALU的输入，这会导致电路的震荡而无法产生正确的结果</p>
+<p>Q:我们为什么要使用 GPR 内部转发？该如何实现？</p>
+<p>前一条指令（如 ALU 运算）需写入 GPR，后一条指令要读取同一个 GPR。无转发时，后指令需等待前指令完成写回才能取到正确数据，会插入1拍的阻塞。转发可直接将前指令的运算结果提前转发给D级，无需等待写回，消除阻塞。</p>
+<p>实现方式：在我的架构中，只需要先对比ID_rs,ID_rt与WB_A3是否相等且不为0，如果满足就把ID_rd1&#x2F;ID_rd2赋值为WD_WB即可。不过我把内部转发实际写在了D级而不是WB级，这样可以和其他转发放在一起，看起来条理更清楚一点。</p>
+<p>GPR内部转发可以直接将来自WB级的指令转发到D级，由于WB级的所有指令的T_new均已为0，所以可以放心转发，在实现这个转发以后，可以保证</p>
+<p>Q:我们转发时数据的需求者和供给者可能来源于哪些位置？共有哪些转发数据通路？</p>
+<p>A:需求者：D级，E级和M级</p>
+<p>供给者：E级，M级和W级</p>
+<p>转发数据通路：从E级到D级，从M级到D级，从W级到D级和从M级到E级，从W级到E级和从W级到M级。</p>
+<p>Q:在课上测试时，我们需要你现场实现新的指令，对于这些新的指令，你可能需要在原有的数据通路上做哪些扩展或修改？提示：你可以对指令进行分类，思考每一类指令可能修改或扩展哪些位置。</p>
+<p>A：R型指令：controller中的ALUOp，ALU中的计算方式，可能要扩展shift接口实现数据左移，右移等逻辑<br>I型指令：B类指令需要扩展branch模块，controller模块中可能需要增加BranchOp接口，如果涉及字节的写入或加载，可能需要扩展DM的输入地址接口并增加内部的字节分支写入或读出判断。并需要增加接口判断读出或写入的是是w还是b。另外，因为目前实现的所有指令都没有在M级前用到内存中内容的场景，实际上没有涉及sw指令的任何转发，但是sw某种意义上是会产生新数据的<br>J型指令：需要修改Jaddr模块的计算逻辑</p>
+<p>Q:简要描述你的译码器架构，并思考该架构的优势以及不足。</p>
+<p>A:我的译码器采用控制信号驱动型的译码风格，主要分为add逻辑确定指令种类，or逻辑确定指令对应的控制信号，并最后通过组合逻辑确定每一个指令的rsT_use,rtT_use和T_new。该架构的优势主要在于代码量较小，且实现逻辑清晰。但是由于没有将每一个指令的控制信号独立出来，导致难以直观的确定每一个指令的控制信号，可能会导致控制信号的疏漏。</p>
+<p>Q:[P5 选做] 请详细描述你的测试方案及测试数据构造策略。<br>A:在之前单一种类测试代码的基础上，我添加了指令联动代码测试所有转发逻辑的运行的正确性以及是否正确阻塞。数值计算仍采取边界数据测试，跳转指令测试了像前，后，的跳转测试，读写内存的偏移也测试了所有正负情况，联动代码中，针对不同的转发，适时地插入空泡和其他指令测试延迟槽的运行正确性</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ztqs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2025/11/26/2025-11-26-P5/">http://example.com/2025/11/26/2025-11-26-P5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">123-Xiaotian's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/CO/">CO</a><a class="post-meta__tags" href="/tags/MIPS/">MIPS</a><a class="post-meta__tags" href="/tags/CPU%E6%9E%B6%E6%9E%84/">CPU架构</a><a class="post-meta__tags" href="/tags/Verilog/">Verilog</a></div><div class="post-share"><div class="social-share" data-image="/img/hutao.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/12/03/2025-12-3-P6/" title="P6流水线CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">P6流水线CPU架构设计</div></div><div class="info-2"><div class="info-item-1">verilog 实现复杂流水线CPU设计概述在P5的流水线基础上增加了若干指令，并外置存储器，增加了单独的乘除法模块和数据扩展模块、 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub,or,slt,sltu 乘除指令:mult, multu, div, divu, mfhi, mflo, mthi, mtlo  I型指令 算数&#x2F;位运算指令：addi,andi,ori,lui B类指令： beq,bne, 访存指令： lb,lh,lw,sb,sh,sw  J型指令 jal,jr  空指令 nop  数据冒险阻塞从D级开始，计算我们所需指令的T_use和T_new，T_use中不需要用到新数据的地方我们填入infty，T_new中不产生新数据的地方我们填入0。这里sw是唯一一个产生新数据但T_new&#x3D;0的指令。    op T_use(rs) T_use(rt) T_new(D)    add 1 1 2   sub 1 1 2   and 1 1 2   or 1 1 2   slt&#x2F;sltu 1 1 2   lui infty inf...</div></div></div></a><a class="pagination-related" href="/2025/11/09/2025-11-09-P4/" title="P4单周期CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">P4单周期CPU架构设计</div></div><div class="info-2"><div class="info-item-1">verilog 实现单周期CPU设计概述通过对于P3的logisim代码进行复现和修改，本CPU实现了在原来的8条指令基础上增加了jal和jr指令的实现 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub  I型指令 算数&#x2F;位运算指令： ori,lui B类指令： beq, 访存指令： lw,sw  J型指令 jal,jr  空指令 nop  主要模块定义IFU(取指模块)该模块包含PC和IM，PC由32位寄存器实现，具有异步复位功能，复位值为起始地址   端口定义     信号名 方向 位宽 描述    clk I 1 时钟信号   reset I 1 异步复位信号   stop I 1 停止信号   next I 32 下一条要被执行的指令的地址   pc O 32 正在执行的指令的地址   Instr O 32 正在执行的指令    功能定义     序号 功能名称 功能描述    1 复位 reset信号有效时，将PC寄存器中的值置为0x00003000   2 停止 stop信号有效时，PC寄存器忽略时钟输入，PC当前值不变   3 写PC寄存器...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/12/16/2025-12-16-P7/" title="P7流水线CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-16</div><div class="info-item-2">P7流水线CPU架构设计</div></div><div class="info-2"><div class="info-item-1">verilog 实现支持异常中断的流水线CPU设计概述在P6的流水线基础上增加了协处理器、系统桥、Timer0、Timer1，并在各个阶段添加了对于内部异常的检测。 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub,or,slt,sltu 乘除指令:mult, multu, div, divu, mfhi, mflo, mthi, mtlo  I型指令 算数&#x2F;位运算指令：addi,andi,ori,lui B类指令： beq,bne, 访存指令： lb,lh,lw,sb,sh,sw  J型指令 jal,jr  协处理器和异常相关指令 mfc0, mtc0, eret, syscall  空指令 nop  功能模块定义这里仅给出新增模块内容的模块定义： 协处理器模块（CP0）端口定义：    信号名 方向 位宽 描述    clk I 1 CPU中的时钟信号   reset I 1 CPU中的复位信号   en I 1 cp0使能信号，高有效   CP0Add I 5 cp0写入或读出寄存器地址   CP0In I 32 cp0写入数据   VPC I 3...</div></div></div></a><a class="pagination-related" href="/2025/12/03/2025-12-3-P6/" title="P6流水线CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-03</div><div class="info-item-2">P6流水线CPU架构设计</div></div><div class="info-2"><div class="info-item-1">verilog 实现复杂流水线CPU设计概述在P5的流水线基础上增加了若干指令，并外置存储器，增加了单独的乘除法模块和数据扩展模块、 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub,or,slt,sltu 乘除指令:mult, multu, div, divu, mfhi, mflo, mthi, mtlo  I型指令 算数&#x2F;位运算指令：addi,andi,ori,lui B类指令： beq,bne, 访存指令： lb,lh,lw,sb,sh,sw  J型指令 jal,jr  空指令 nop  数据冒险阻塞从D级开始，计算我们所需指令的T_use和T_new，T_use中不需要用到新数据的地方我们填入infty，T_new中不产生新数据的地方我们填入0。这里sw是唯一一个产生新数据但T_new&#x3D;0的指令。    op T_use(rs) T_use(rt) T_new(D)    add 1 1 2   sub 1 1 2   and 1 1 2   or 1 1 2   slt&#x2F;sltu 1 1 2   lui infty inf...</div></div></div></a><a class="pagination-related" href="/2025/11/09/2025-11-09-P4/" title="P4单周期CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-09</div><div class="info-item-2">P4单周期CPU架构设计</div></div><div class="info-2"><div class="info-item-1">verilog 实现单周期CPU设计概述通过对于P3的logisim代码进行复现和修改，本CPU实现了在原来的8条指令基础上增加了jal和jr指令的实现 实现指令说明R型指令 算数&#x2F;位运算指令：add,sub  I型指令 算数&#x2F;位运算指令： ori,lui B类指令： beq, 访存指令： lw,sw  J型指令 jal,jr  空指令 nop  主要模块定义IFU(取指模块)该模块包含PC和IM，PC由32位寄存器实现，具有异步复位功能，复位值为起始地址   端口定义     信号名 方向 位宽 描述    clk I 1 时钟信号   reset I 1 异步复位信号   stop I 1 停止信号   next I 32 下一条要被执行的指令的地址   pc O 32 正在执行的指令的地址   Instr O 32 正在执行的指令    功能定义     序号 功能名称 功能描述    1 复位 reset信号有效时，将PC寄存器中的值置为0x00003000   2 停止 stop信号有效时，PC寄存器忽略时钟输入，PC当前值不变   3 写PC寄存器...</div></div></div></a><a class="pagination-related" href="/2025/11/02/2025-11-02-P3/" title="P3单周期CPU架构设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-02</div><div class="info-item-2">P3单周期CPU架构设计</div></div><div class="info-2"><div class="info-item-1">P3单周期CPU架构设计设计概述自下而上设计Logisim实现的单周期MIPS架构CPU，该CPU支持8条指令，为实现该功能，我设计了IFU,GRF,ALU,DM,EXT,Controller,NPC等多个主要模块，先分别设计各个模块，再进行综合链接已实现完整数据通路。  实现指令说明R型指令 算数&#x2F;位运算指令：add,sub  I型指令 算数&#x2F;位运算指令： ori,lui B类指令： beq, 访存指令： lw,sw  空指令 nop  主要模块定义IFU(取指模块)该模块包含PC和IM，PC由32位寄存器实现，具有异步复位功能，复位值为起始地址   端口定义     信号名 方向 位宽 描述    clk I 1 时钟信号   reset I 1 异步复位信号   stop I 1 停止信号   NextPC I 32 下一条要被执行的指令的地址   PC O 32 正在执行的指令的地址   Instr O 32 正在执行的指令    功能定义     序号 功能名称 功能描述    1 复位 reset信号有效时，将PC寄存器中的值置为0x0000300...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/hutao.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ztqs</div><div class="author-info-description">h1w</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#verilog%E5%AE%9E%E7%8E%B0%E6%B5%81%E6%B0%B4%E7%BA%BFCPU"><span class="toc-number">1.</span> <span class="toc-text">verilog实现流水线CPU</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E8%8D%89%E5%9B%BE"><span class="toc-number">1.1.</span> <span class="toc-text">数据通路草图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E6%A6%82%E8%BF%B0"><span class="toc-number">1.2.</span> <span class="toc-text">设计概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%8C%87%E4%BB%A4%E8%AF%B4%E6%98%8E"><span class="toc-number">1.3.</span> <span class="toc-text">实现指令说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#R%E5%9E%8B%E6%8C%87%E4%BB%A4"><span class="toc-number">1.3.1.</span> <span class="toc-text">R型指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I%E5%9E%8B%E6%8C%87%E4%BB%A4"><span class="toc-number">1.3.2.</span> <span class="toc-text">I型指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#J%E5%9E%8B%E6%8C%87%E4%BB%A4"><span class="toc-number">1.3.3.</span> <span class="toc-text">J型指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BA%E6%8C%87%E4%BB%A4"><span class="toc-number">1.3.4.</span> <span class="toc-text">空指令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9"><span class="toc-number">1.4.</span> <span class="toc-text">数据冒险</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%BB%E5%A1%9E"><span class="toc-number">1.4.1.</span> <span class="toc-text">阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E5%8F%91"><span class="toc-number">1.4.2.</span> <span class="toc-text">转发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E6%A8%A1%E5%9D%97%E5%AE%9A%E4%B9%89"><span class="toc-number">1.5.</span> <span class="toc-text">功能模块定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IFU%EF%BC%88%E5%8F%96%E6%8C%87%E6%A8%A1%E5%9D%97%EF%BC%89"><span class="toc-number">1.5.1.</span> <span class="toc-text">IFU（取指模块）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ALU-%E7%AE%97%E6%95%B0%E9%80%BB%E8%BE%91%E5%8D%95%E5%85%83"><span class="toc-number">1.5.2.</span> <span class="toc-text">ALU (算数逻辑单元)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Controller-%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">1.5.3.</span> <span class="toc-text">Controller (控制器)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NPC-%E6%8C%87%E4%BB%A4%E8%BD%AC%E7%A7%BB%E5%99%A8"><span class="toc-number">1.5.4.</span> <span class="toc-text">NPC (指令转移器)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8%E5%AE%9A%E4%B9%89"><span class="toc-number">1.6.</span> <span class="toc-text">流水线寄存器定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FD-reg-D%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.6.1.</span> <span class="toc-text">FD_reg(D级流水线寄存器)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DE-reg-E%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.6.2.</span> <span class="toc-text">DE_reg(E级流水线寄存器)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EM-reg-M%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.6.3.</span> <span class="toc-text">EM_reg(M级流水线寄存器)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MW-reg-W%E7%BA%A7%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-number">1.6.4.</span> <span class="toc-text">MW_reg(W级流水线寄存器)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="toc-number">1.7.</span> <span class="toc-text">测试方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%B1%BB%E6%8C%87%E4%BB%A4%E6%B5%8B%E8%AF%95"><span class="toc-number">1.7.1.</span> <span class="toc-text">运算类指令测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B%E7%B1%BB%E6%8C%87%E4%BB%A4%E6%B5%8B%E8%AF%95"><span class="toc-number">1.7.2.</span> <span class="toc-text">B类指令测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#J%E7%B1%BB%E6%8C%87%E4%BB%A4%E6%B5%8B%E8%AF%95"><span class="toc-number">1.7.3.</span> <span class="toc-text">J类指令测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%98%BB%E5%A1%9E%E8%81%94%E5%8A%A8%E6%B5%8B%E8%AF%95"><span class="toc-number">1.7.4.</span> <span class="toc-text">指令转发与阻塞联动测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.8.</span> <span class="toc-text">思考题</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/26/2026-3-26-unit1/" title="OOP Unit1 表达式解析">OOP Unit1 表达式解析</a><time datetime="2026-03-26T13:44:00.000Z" title="发表于 2026-03-26 21:44:00">2026-03-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告">操作系统 oslab0 实验报告</a><time datetime="2026-03-18T16:18:00.000Z" title="发表于 2026-03-19 00:18:00">2026-03-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/16/2025-12-16-P7/" title="P7流水线CPU架构设计">P7流水线CPU架构设计</a><time datetime="2025-12-15T17:57:00.000Z" title="发表于 2025-12-16 01:57:00">2025-12-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/03/2025-12-3-P6/" title="P6流水线CPU架构设计">P6流水线CPU架构设计</a><time datetime="2025-12-03T14:24:00.000Z" title="发表于 2025-12-03 22:24:00">2025-12-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/26/2025-11-26-P5/" title="P5流水线CPU架构设计">P5流水线CPU架构设计</a><time datetime="2025-11-26T13:27:00.000Z" title="发表于 2025-11-26 21:27:00">2025-11-26</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Ztqs</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
