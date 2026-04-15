@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>操作系统 oslab2 实验报告 | 123-Xiaotian's Blog</title><meta name="author" content="Ztqs"><meta name="copyright" content="Ztqs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="lab2 实验报告思考题Thinking 2.1C语言中，指针变量中存储的地址被视为虚拟地址，MIPS中lw和sw指令使用的同样是虚拟地址。 Thinking 2.2 2.2.1 由于宏是字符串替换，因此一套宏代码可支持任意数据类型，无需为每种类型重写链表。且宏增删改查逻辑可以只写一次，大幅提高代码复用率。宏只处理链表结构，不关心节点数据类型，模块化强。编译期展开，效率高，适合底层系统开发。一处修">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统 oslab2 实验报告">
+<meta property="og:url" content="http://example.com/2026/04/07/2026-4-7-lab2/index.html">
+<meta property="og:site_name" content="123-Xiaotian&#39;s Blog">
+<meta property="og:description" content="lab2 实验报告思考题Thinking 2.1C语言中，指针变量中存储的地址被视为虚拟地址，MIPS中lw和sw指令使用的同样是虚拟地址。 Thinking 2.2 2.2.1 由于宏是字符串替换，因此一套宏代码可支持任意数据类型，无需为每种类型重写链表。且宏增删改查逻辑可以只写一次，大幅提高代码复用率。宏只处理链表结构，不关心节点数据类型，模块化强。编译期展开，效率高，适合底层系统开发。一处修">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/hutao.jpg">
+<meta property="article:published_time" content="2026-04-07T06:06:00.000Z">
+<meta property="article:modified_time" content="2026-04-15T13:40:59.235Z">
+<meta property="article:author" content="Ztqs">
+<meta property="article:tag" content="Lab2">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/hutao.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "操作系统 oslab2 实验报告",
+  "url": "http://example.com/2026/04/07/2026-4-7-lab2/",
+  "image": "http://example.com/img/hutao.jpg",
+  "datePublished": "2026-04-07T06:06:00.000Z",
+  "dateModified": "2026-04-15T13:40:59.235Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ztqs",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2026/04/07/2026-4-7-lab2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '操作系统 oslab2 实验报告',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" /><style> body, div, a, p, h1, h2, h3, h4, h5, h6 { font-family: "LXGW WenKai Screen", sans-serif !important; } #page-header { background-attachment: fixed !important; } </style><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/hutao2.png);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/hutao2.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">123-Xiaotian's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">操作系统 oslab2 实验报告</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">操作系统 oslab2 实验报告</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-07T06:06:00.000Z" title="发表于 2026-04-07 14:06:00">2026-04-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T13:40:59.235Z" title="更新于 2026-04-15 21:40:59">2026-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/OS/">OS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="lab2-实验报告"><a href="#lab2-实验报告" class="headerlink" title="lab2 实验报告"></a>lab2 实验报告</h1><h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><h3 id="Thinking-2-1"><a href="#Thinking-2-1" class="headerlink" title="Thinking 2.1"></a>Thinking 2.1</h3><p>C语言中，指针变量中存储的地址被视为虚拟地址，MIPS中lw和sw指令使用的同样是虚拟地址。</p>
+<h3 id="Thinking-2-2"><a href="#Thinking-2-2" class="headerlink" title="Thinking 2.2"></a>Thinking 2.2</h3><ul>
+<li><p>2.2.1 由于宏是字符串替换，因此一套宏代码可支持任意数据类型，无需为每种类型重写链表。且宏增删改查逻辑可以只写一次，大幅提高代码复用率。宏只处理链表结构，不关心节点数据类型，模块化强。编译期展开，效率高，适合底层系统开发。一处修改，所有使用处自动更新，可维护性极强。</p>
+</li>
+<li><p>2.2.2 三种链表操作性能对比</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">操作</th>
+<th align="center">单向链表</th>
+<th align="center">双向链表（实验用）</th>
+<th align="center">循环链表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">头部插入</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+</tr>
+<tr>
+<td align="center">尾部插入</td>
+<td align="center">O(n) &#x2F; 带尾指针 O(1)</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+</tr>
+<tr>
+<td align="center">已知节点后插入</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+</tr>
+<tr>
+<td align="center">已知节点前插入</td>
+<td align="center">O(n)（要找前驱）</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+</tr>
+<tr>
+<td align="center">删除已知节点</td>
+<td align="center">O(n)（要找前驱）</td>
+<td align="center">O(1)</td>
+<td align="center">O(1)</td>
+</tr>
+<tr>
+<td align="center">遍历方向</td>
+<td align="center">仅向前</td>
+<td align="center">双向</td>
+<td align="center">双向&#x2F;循环</td>
+</tr>
+</tbody></table>
+<h3 id="Thinking-2-3"><a href="#Thinking-2-3" class="headerlink" title="Thinking 2.3"></a>Thinking 2.3</h3><p>选B</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Page_list</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> *<span class="title">le_next</span>;</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">Page</span> **<span class="title">le_prev</span>;</span></span><br><span class="line">        &#125; pp_link;</span><br><span class="line">    u_short pp_ref;</span><br><span class="line">    &#125; lh_first;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Thinking-2-4"><a href="#Thinking-2-4" class="headerlink" title="Thinking 2.4"></a>Thinking 2.4</h3><ul>
+<li><p>2.4.1 在多进程操作系统中，ASID 的必要性主要体现在隔离性保障和性能优化两个方面。隔离性无需多言，asid区分了当前tlb表项属于哪个进程，其他进程使用这个页表项查询的时候会直接触发miss，很好的保证了虚拟地址的隔离性。而性能优化则是进程切换时无需频繁flush大面积的tlb，因为已经用asid区分了页表，只需要按需flush即可。</p>
+</li>
+<li><p>2.4.2 MIPS 4Kc 处理器硬件中，ASID 字段有8位，因此最大可以容纳256个不同的地址空间。在实际的OS设计中，通常会保留ASID&#x3D;0作为内核或特殊用途，供普通进程分配的 ASID 通常是255个。当系统中同时运行的进程超过255个时，操作系统就需要通过软件算法来回收和复用这些ASID了</p>
+</li>
+</ul>
+<h3 id="Thinking-2-5"><a href="#Thinking-2-5" class="headerlink" title="Thinking 2.5"></a>Thinking 2.5</h3><ul>
+<li><p>2.5.1 tlb_invalidate 调用 tlb_out</p>
+</li>
+<li><p>2.5.2 实现对tlb的操作并清空对应的tlb表项</p>
+</li>
+<li><p>2.5.3 注释如下</p>
+</li>
+</ul>
+<figure class="highlight mips"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">LEAF(tlb_out)</span><br><span class="line"><span class="meta">.set</span> <span class="keyword">noreorder</span></span><br><span class="line"><span class="keyword"></span>	<span class="keyword">mfc0 </span>   <span class="built_in">t0</span>, CP0_ENTRYHI // 缓存原来的<span class="built_in">entryhi</span></span><br><span class="line">	<span class="keyword">mtc0 </span>   <span class="built_in">a0</span>, CP0_ENTRYHI // 把key填进<span class="built_in">entryhi</span></span><br><span class="line">	<span class="keyword">nop</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line">	<span class="keyword">tlbp </span>// 查询index</span><br><span class="line"></span><br><span class="line">	<span class="keyword">nop</span></span><br><span class="line"><span class="keyword"></span>	<span class="keyword">mfc0 </span>   <span class="built_in">t1</span>, CP0_INDEX // 获取index</span><br><span class="line"><span class="meta">.set</span> reorder</span><br><span class="line">	<span class="keyword">bltz </span>   <span class="built_in">t1</span>, NO_SUCH_ENTRY // index小于零，说明没查到，无需清零</span><br><span class="line"><span class="meta">.set</span> <span class="keyword">noreorder</span></span><br><span class="line"><span class="keyword"></span>	<span class="keyword">mtc0 </span>   <span class="built_in">zero</span>, CP0_ENTRYHI // 清零<span class="built_in">entryhi</span></span><br><span class="line">	<span class="keyword">mtc0 </span>   <span class="built_in">zero</span>, CP0_ENTRYLO0 // 清零<span class="built_in">entrylo0</span></span><br><span class="line">	<span class="keyword">mtc0 </span>   <span class="built_in">zero</span>, CP0_ENTRYLO1 //  清零<span class="built_in">entrylo1</span></span><br><span class="line">	<span class="keyword">nop</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line">	<span class="keyword">tlbwi </span>// 通过index写入</span><br><span class="line"></span><br><span class="line"><span class="meta">.set</span> reorder</span><br><span class="line"><span class="symbol"></span></span><br><span class="line"><span class="symbol">NO_SUCH_ENTRY:</span></span><br><span class="line">	<span class="keyword">mtc0 </span>   <span class="built_in">t0</span>, CP0_ENTRYHI // 恢复原来的<span class="built_in">entryhi</span></span><br><span class="line">	<span class="keyword">j </span>      <span class="built_in">ra</span> // 返回</span><br><span class="line">END(tlb_out)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Thinking-2-6"><a href="#Thinking-2-6" class="headerlink" title="Thinking 2.6"></a>Thinking 2.6</h3><p>cpu仿存时，先查看tlb，如果tlb缺失，会调用tlb_refill进行重填，用page_lookup查页表，如果发现页表也缺失，会直接调用passive_alloc,passive_alloc会调用page_alloc和page_insert,前者申请了一个空的物理页，后者建立了虚拟地址到这个空白物理页的映射，实际上是处理了缺页异常，诶但是这里我有一个问题，_do_refill_tlb函数中不是已经调用了invalidate_tlb了吗，为啥page_insert中还要再调用一次tlb_invalidate呢？我的理解是，因为page_insert实际上是一个通用的函数，不仅这里的tlb_refill会调用，其他地方也会调用。而如果省略tlb_refill中的tlb_invalidate，那么不触发缺页异常的时候就会导致tlb没有被invalidate，从而引发错误。</p>
+<h3 id="Thinking-2-7"><a href="#Thinking-2-7" class="headerlink" title="Thinking 2.7"></a>Thinking 2.7</h3><p>x86 采用了段页式管理，存在逻辑地址到线性地址的转换，且 TLB 缺失时的页表遍历由 MMU 硬件自动完成；而 MIPS 采用纯页式管理，地址空间被硬件硬性分区，TLB 缺失完全交由 OS 软件（触发异常）进行重填。</p>
+<h2 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h2><p>exam主要难点在于对于链表工具的熟悉度和C语言的宏操作，整体并不难这里不做赘述。extra的难点在于自映射过程，应当注意到构建自映射的时候，是需要自己从空闲内存处申请内存的，这里我没有想到所以卡在了第一个函数的构建。第二和第三个函数其实考察的是虚拟地址的组成方式，其实是最好拿分的部分。第三部分主要要注意寻找映射和清空tlb的过程。</p>
+<h2 id="实验体会"><a href="#实验体会" class="headerlink" title="实验体会"></a>实验体会</h2><p>应当加强对于自映射过程的学习，尤其是对于用户态的自映射，以及对于虚拟地址的组成方式的理解。</p>
+<h2 id="原创说明"><a href="#原创说明" class="headerlink" title="原创说明"></a>原创说明</h2><p>本实验报告为原创，未参考任何资料，如有雷同，纯属巧合。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ztqs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2026/04/07/2026-4-7-lab2/">http://example.com/2026/04/07/2026-4-7-lab2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">123-Xiaotian's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><a class="post-meta__tags" href="/tags/Lab2/">Lab2</a></div><div class="post-share"><div class="social-share" data-image="/img/hutao.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/04/01/2026-4-1-lab1/" title="操作系统 oslab1 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">操作系统 oslab1 实验报告</div></div><div class="info-2"><div class="info-item-1">lab1 实验报告思考题Thinking 1.1创建文件hello.c,编写如下代码： 123456#include &lt;stdio.h&gt;int main()&#123;    puts(&quot;Hello World!&quot;);    return 0;&#125;  利用x86编译出原生汇编文件，阅读elf头可确定文件系统架构为x86-64。$ gcc -g -c hello.c -o hello_x86.o$ readelf -h hello_x86.oELF 头：  Magic：   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00  类别:                              ELF64  数据:                              2 补码，小端序 (little endian)  Version:                           1 (current)  OS&#x2F;ABI:                            UN...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">操作系统 oslab0 实验报告</div></div><div class="info-2"><div class="info-item-1">lab0实验报告思考题Thinking 0.1Untracted.txt中的内容：位于分支 master 尚无提交 未跟踪的文件:  （使用 “git add &lt;文件&gt;…” 以包含要提交的内容）        README.txt        Untracted.txt Staged.txt中的内容：位于分支 master 尚无提交 要提交的变更：  （使用 “git rm –cached &lt;文件&gt;…” 以取消暂存）        新文件：   README.txt Modified.txt中的内容： 位于分支 master尚未暂存以备提交的变更：  （使用 “git add &lt;文件&gt;…” 更新要提交的内容）  （使用 “git restore &lt;文件&gt;…” 丢弃工作区的改动）        修改：     README.txt 结果不一样，第一次add的时候给出的是要提交的变更，第二次给出的是尚未暂存以备提交的变更，第二次必须得再add一次把修改添加到暂存区才能正确提交。 Thinking 0.2add the file 是 g...</div></div></div></a><a class="pagination-related" href="/2026/04/01/2026-4-1-lab1/" title="操作系统 oslab1 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-01</div><div class="info-item-2">操作系统 oslab1 实验报告</div></div><div class="info-2"><div class="info-item-1">lab1 实验报告思考题Thinking 1.1创建文件hello.c,编写如下代码： 123456#include &lt;stdio.h&gt;int main()&#123;    puts(&quot;Hello World!&quot;);    return 0;&#125;  利用x86编译出原生汇编文件，阅读elf头可确定文件系统架构为x86-64。$ gcc -g -c hello.c -o hello_x86.o$ readelf -h hello_x86.oELF 头：  Magic：   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00  类别:                              ELF64  数据:                              2 补码，小端序 (little endian)  Version:                           1 (current)  OS&#x2F;ABI:                            UN...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/hutao.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ztqs</div><div class="author-info-description">h1w</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#lab2-%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">lab2 实验报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">思考题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-1"><span class="toc-number">1.1.1.</span> <span class="toc-text">Thinking 2.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-2"><span class="toc-number">1.1.2.</span> <span class="toc-text">Thinking 2.2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-3"><span class="toc-number">1.1.3.</span> <span class="toc-text">Thinking 2.3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-4"><span class="toc-number">1.1.4.</span> <span class="toc-text">Thinking 2.4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-5"><span class="toc-number">1.1.5.</span> <span class="toc-text">Thinking 2.5</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-6"><span class="toc-number">1.1.6.</span> <span class="toc-text">Thinking 2.6</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-2-7"><span class="toc-number">1.1.7.</span> <span class="toc-text">Thinking 2.7</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%BE%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">难点分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E4%BD%93%E4%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">实验体会</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E8%AF%B4%E6%98%8E"><span class="toc-number">1.4.</span> <span class="toc-text">原创说明</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/07/2026-4-7-lab2/" title="操作系统 oslab2 实验报告">操作系统 oslab2 实验报告</a><time datetime="2026-04-07T06:06:00.000Z" title="发表于 2026-04-07 14:06:00">2026-04-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/01/2026-4-1-lab1/" title="操作系统 oslab1 实验报告">操作系统 oslab1 实验报告</a><time datetime="2026-04-01T06:06:00.000Z" title="发表于 2026-04-01 14:06:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/26/2026-3-26-unit1/" title="OOP Unit1 表达式解析">OOP Unit1 表达式解析</a><time datetime="2026-03-26T13:44:00.000Z" title="发表于 2026-03-26 21:44:00">2026-03-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告">操作系统 oslab0 实验报告</a><time datetime="2026-03-18T16:18:00.000Z" title="发表于 2026-03-19 00:18:00">2026-03-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/12/16/2025-12-16-P7/" title="P7流水线CPU架构设计">P7流水线CPU架构设计</a><time datetime="2025-12-15T17:57:00.000Z" title="发表于 2025-12-16 01:57:00">2025-12-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Ztqs</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
