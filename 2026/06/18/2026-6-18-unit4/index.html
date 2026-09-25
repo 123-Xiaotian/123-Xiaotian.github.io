@@ -1,0 +1,302 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>OOP Unit4 正向建模与图书馆管理系统 | 123-Xiaotian's Blog</title><meta name="author" content="Ztqs"><meta name="copyright" content="Ztqs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Unit4 正向建模与图书馆管理系统一、正向建模与两阶类图Unit4 的核心实践是正向建模：先画 UML，再写代码，而非从代码反向生成 UML。本单元的三次作业（hw13&#x2F;hw14&#x2F;hw15）围绕图书馆管理系统逐次扩展，UML 模型从第一版设计开始就被要求以”两阶类图”提交——第一次提交初版设计模型，第二次提交最终代码对应的实现模型。 两阶类图的作用两阶类图的机制迫使开发者在编">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OOP Unit4 正向建模与图书馆管理系统">
+<meta property="og:url" content="http://example.com/2026/06/18/2026-6-18-unit4/index.html">
+<meta property="og:site_name" content="123-Xiaotian&#39;s Blog">
+<meta property="og:description" content="Unit4 正向建模与图书馆管理系统一、正向建模与两阶类图Unit4 的核心实践是正向建模：先画 UML，再写代码，而非从代码反向生成 UML。本单元的三次作业（hw13&#x2F;hw14&#x2F;hw15）围绕图书馆管理系统逐次扩展，UML 模型从第一版设计开始就被要求以”两阶类图”提交——第一次提交初版设计模型，第二次提交最终代码对应的实现模型。 两阶类图的作用两阶类图的机制迫使开发者在编">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/hutao.jpg">
+<meta property="article:published_time" content="2026-06-18T11:23:00.000Z">
+<meta property="article:modified_time" content="2026-09-25T14:45:26.192Z">
+<meta property="article:author" content="Ztqs">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="OOP">
+<meta property="article:tag" content="UML">
+<meta property="article:tag" content="架构设计">
+<meta property="article:tag" content="正向建模">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/hutao.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OOP Unit4 正向建模与图书馆管理系统",
+  "url": "http://example.com/2026/06/18/2026-6-18-unit4/",
+  "image": "http://example.com/img/hutao.jpg",
+  "datePublished": "2026-06-18T11:23:00.000Z",
+  "dateModified": "2026-09-25T14:45:26.192Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ztqs",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2026/06/18/2026-6-18-unit4/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OOP Unit4 正向建模与图书馆管理系统',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" /><style> body, div, a, p, h1, h2, h3, h4, h5, h6 { font-family: "LXGW WenKai Screen", sans-serif !important; } #page-header { background-attachment: fixed !important; } </style><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/hutao3.png);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/hutao3.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">123-Xiaotian's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">OOP Unit4 正向建模与图书馆管理系统</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">OOP Unit4 正向建模与图书馆管理系统</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-18T11:23:00.000Z" title="发表于 2026-06-18 19:23:00">2026-06-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-25T14:45:26.192Z" title="更新于 2026-09-25 22:45:26">2026-09-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0/">面向对象设计与构造</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Unit4-正向建模与图书馆管理系统"><a href="#Unit4-正向建模与图书馆管理系统" class="headerlink" title="Unit4 正向建模与图书馆管理系统"></a>Unit4 正向建模与图书馆管理系统</h1><h2 id="一、正向建模与两阶类图"><a href="#一、正向建模与两阶类图" class="headerlink" title="一、正向建模与两阶类图"></a>一、正向建模与两阶类图</h2><p>Unit4 的核心实践是正向建模：先画 UML，再写代码，而非从代码反向生成 UML。本单元的三次作业（hw13&#x2F;hw14&#x2F;hw15）围绕图书馆管理系统逐次扩展，UML 模型从第一版设计开始就被要求以”两阶类图”提交——第一次提交初版设计模型，第二次提交最终代码对应的实现模型。</p>
+<h3 id="两阶类图的作用"><a href="#两阶类图的作用" class="headerlink" title="两阶类图的作用"></a>两阶类图的作用</h3><p>两阶类图的机制迫使开发者在编码前完成架构决策，而非在代码中”边写边想”。具体来说：</p>
+<ul>
+<li><p>阶段一（设计类图）：确定有哪些类、每个类有哪些属性和方法、类之间的关联关系。这一步要求开发者从需求文档中提取领域模型，而不是面向具体 API 做设计。例如 hw13 初期，我确定了 <code>LibraryManager</code> 作为总调度器、<code>BookShelf</code>&#x2F;<code>BorrowReturnOffice</code>&#x2F;<code>AppointmentOffice</code> 作为三个物理场所的抽象、<code>Book</code> 和 <code>User</code> 作为核心实体。这些类的职责边界在设计阶段就被锁定——借还处只管暂存，预约处只管预约，书架只管存书——后续迭代中从未因职责不清而需要重构。</p>
+</li>
+<li><p>阶段二（实现类图）：编码完成后，将实际代码的类结构同步回 UML。这一步暴露出设计阶段没有预料到的细节。例如 hw14 新增 <code>TreasuredBookShelf</code> 后，我发现需要在 <code>LibraryManager</code> 中新增 <code>isTreasured()</code> 和 <code>moveToCorrectShelf()</code> 方法，并在模型层补上相应的关联线和属性。两阶对比的过程本身就是一次架构审查。</p>
+</li>
+</ul>
+<blockquote>
+<p>设计类图决定”做什么”，实现类图验证”怎么做”是否与”做什么”一致。</p>
+</blockquote>
+<h3 id="正向建模与反向建模的对比"><a href="#正向建模与反向建模的对比" class="headerlink" title="正向建模与反向建模的对比"></a>正向建模与反向建模的对比</h3><p>与 Unit1-3 先写代码后补图的做法相比，正向建模最显著的差异是：bug 的产生模式变了。反向建模时代，bug 往往是”代码逻辑写错了”；正向建模时代，bug 更多是”设计模型与实现模型之间的不一致”——例如 UML 中声明了关联但代码中没有对应的字段引用（R2 评测失败），或者方法名在代码中改了但 UML 没同步（R3 评测失败）。这种 bug 的根源在于设计与实现的脱节，而非逻辑本身的错误。</p>
+<hr>
+<h2 id="二、架构设计与-UML-模型追踪"><a href="#二、架构设计与-UML-模型追踪" class="headerlink" title="二、架构设计与 UML 模型追踪"></a>二、架构设计与 UML 模型追踪</h2><h3 id="最终代码架构"><a href="#最终代码架构" class="headerlink" title="最终代码架构"></a>最终代码架构</h3><p>hw15 的最终代码由 16 个类构成，分为三个层次：</p>
+<ul>
+<li>实体层：<code>Book</code>、<code>User</code>、<code>DueEntry</code>、<code>Reservation</code>、<code>OrderRequest</code>、<code>ReadingEntry</code>、<code>ScoreRecord</code></li>
+<li>场所层：<code>BookShelf</code>、<code>TreasuredBookShelf</code>、<code>BorrowReturnOffice</code>、<code>AppointmentOffice</code>、<code>ReadingRoom</code></li>
+<li>调度层：<code>LibraryManager</code>、<code>MainClass</code>、<code>DueTracker</code>、<code>GradeCalculator</code></li>
+</ul>
+<p><code>LibraryManager</code> 持有所有场所和追踪器的引用，方法按操作类型命名（<code>handleBorrowBook</code>、<code>handleReturnBook</code> 等），<code>arrangeBooks</code> 负责整理逻辑。<code>DueTracker</code> 采用 38 槽循环数组 + head 指针的设计，按日历差自动前进，支持跳过无指令日期的场景。整个数据流是单向的：<code>MainClass</code> 读指令 → <code>LibraryManager</code> 调度 → 各场所执行 → PRINTER 输出。</p>
+<h3 id="代码与-UML-模型的追踪关系"><a href="#代码与-UML-模型的追踪关系" class="headerlink" title="代码与 UML 模型的追踪关系"></a>代码与 UML 模型的追踪关系</h3><p>StarUML 的 <code>.mdj</code> 文件本质上是 JSON。实现类图（<code>uml_ultimate.mdj</code>）包含 19 个 <code>UMLClass</code> 元素（16 个业务类 + 3 个内部属性的类引用）和 15 条 <code>UMLAssociation</code>。以下是对应关系的关键点：</p>
+<table>
+<thead>
+<tr>
+<th>代码元素</th>
+<th>UML 对应</th>
+<th>追踪方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>LibraryManager</code> 的 10 个字段</td>
+<td>10 条 <code>UMLAssociation</code> 指向对应类</td>
+<td><code>end1</code>&#x2F;<code>end2</code> 的 <code>$ref</code> 指向双方类的 <code>_id</code></td>
+</tr>
+<tr>
+<td><code>DueTracker.buckets</code> 数组字段</td>
+<td>属性列表中的 <code>UMLAttribute</code></td>
+<td><code>type</code> 字段设为 <code>List[]</code></td>
+</tr>
+<tr>
+<td><code>handleBorrowBook</code> 方法</td>
+<td><code>UMLOperation</code> + <code>@Trigger</code> 注解</td>
+<td>操作名完全一致，参数类型匹配指导书要求</td>
+</tr>
+<tr>
+<td>顺序图 4 条消息</td>
+<td><code>UMLSequenceDiagram</code> 中的 <code>UMLLifeline</code> + <code>UMLMessage</code></td>
+<td>每条 lifeline 的 <code>represent</code> 同时含 <code>_type: &quot;UMLClass&quot;</code> 和 <code>$ref</code></td>
+</tr>
+</tbody></table>
+<p>主要的追踪不匹配出现在：</p>
+<ul>
+<li>空壳方法：<code>Book.getBookCopyId()</code>、<code>Book.getBookCategory()</code>、<code>AppointmentOffice.orderBook()</code> 等在代码中不参与任何业务逻辑，但为了通过 R2&#x2F;R3 评测必须同时存在于代码和 UML 中。这些方法是评测驱动的产物，不是设计意图的体现。</li>
+<li>内部类拉平：<code>ReadingEntry</code> 和 <code>DueEntry</code> 原本设计为内部类，但 UML 评测不认内部类，必须拉平为独立的顶层 <code>UMLClass</code>。代码中的内部类变成平级类后，关联关系需要重新建立（<code>ReadingRoom</code> → <code>ReadingEntry</code>、<code>DueTracker</code> → <code>DueEntry</code>）。</li>
+<li>StarUML 重保存丢视图层：程序化插入的 <code>ownedViews</code>（UMLClassView、UMLAssociationView）在 StarUML 打开顺序图后直接保存会丢失。这使得”先代码后同步 UML”的工作流不可靠——必须用脚本一次性生成所有视图层数据。</li>
+</ul>
+<h3 id="hw14-→-hw15-架构扩展分析"><a href="#hw14-→-hw15-架构扩展分析" class="headerlink" title="hw14 → hw15 架构扩展分析"></a>hw14 → hw15 架构扩展分析</h3><p>从 hw14 到 hw15，新增了信用分系统、借阅期限和续订三大功能。架构上的变化：</p>
+<ul>
+<li><code>DueTracker</code> 类的引入是本次迭代中最关键的架构决策。如果直接在 <code>LibraryManager</code> 中维护 <code>HashMap&lt;bookId, dueDate&gt;</code>，虽然简单，但 <code>tick</code> 操作需要遍历所有在借书判断逾期——O(n) 每 tick。而循环数组方案将 tick 降为 O(过期数)，且天然处理日期跳空场景。</li>
+<li><code>User</code> 类新增 <code>creditScore</code> 字段和 <code>addCredit(delta)</code> 方法，信用分检查嵌入到 <code>handleBorrowBook</code>、<code>handleOrderBook</code>、<code>handleReadBook</code> 的拒绝条件中。这种”分散式权限检查”是权衡后的选择——如果抽象出一个 <code>CreditChecker</code> 类，虽然内聚性更好，但对于仅 3 处调用且逻辑简单（<code>&gt; 80</code>、<code>&gt; 40</code>、<code>&gt; 0</code>）的场景，增加新类的收益不足以抵消 UML 图同步的额外工作。</li>
+<li><code>arrangeBooks</code> 的 tick 调用位置经历了一次修正：最初放在闭馆整理中单独调用，后改为每次 <code>arrangeBooks</code> 开头统一调用，不分开闭馆。这一改动因为 tick 按日历差前进，不需要区分开闭馆——逾期就是逾期，在任何整理时机都应该处理。</li>
+</ul>
+<hr>
+<h2 id="三、大模型辅助正向建模"><a href="#三、大模型辅助正向建模" class="headerlink" title="三、大模型辅助正向建模"></a>三、大模型辅助正向建模</h2><p>本单元中，我深度使用了 Code Agent（主要为 hermes + deepseek-v4-pro）辅助架构设计和 UML 同步。以下是实际使用总结。</p>
+<h3 id="任务分工"><a href="#任务分工" class="headerlink" title="任务分工"></a>任务分工</h3><p>我将 Agent 定位为”架构评审员”和”UML 同步工具”，而非”架构设计师”。具体角色：</p>
+<ul>
+<li>我：阅读指导书、确定类职责划分、设计核心数据结构（如 DueTracker 环形数组）、编写业务逻辑</li>
+<li>Agent：审查架构一致性（UML 与代码的差异检测）、检查顺序图 R1-R4 合规性、在迭代中对比新旧 jar 包 API 变化</li>
+</ul>
+<h3 id="引导大模型完成架构设计任务的方法"><a href="#引导大模型完成架构设计任务的方法" class="headerlink" title="引导大模型完成架构设计任务的方法"></a>引导大模型完成架构设计任务的方法</h3><p>通过三次迭代的反复使用，我总结出以下有效引导策略：</p>
+<ol>
+<li><p>先给约束再给任务：直接把指导书 pdf 扔给模型让它”设计架构”会得到一份过度抽象或脱离 API 的方案。正确的做法是先明确硬约束——“官方包 library3 提供了这些类，你必须基于这些 API 设计”——然后再问架构问题。约束包括：不可修改的接口、PRINTER 的调用规则、状态转移必须标注 @Trigger。</p>
+</li>
+<li><p>要求维护”设计决策日志”：每当我做出一个架构决策（如”DueTracker 用循环数组而非 HashMap+遍历”），让 Agent 记录决策理由、替代方案和取舍。在后续迭代中，当新需求到来时，Agent 可以自动检查既有决策是否与新需求冲突。例如续订功能的引入对 DueTracker 的影响——Agent 在日志中发现”SLOTS&#x3D;31 是基于 C 类 30 天最大值”这一决策，立即指出续订 +7 天后需要扩容到 38。</p>
+</li>
+<li><p>分步验证，不一次到位：对于顺序图这种 StarUML 格式极其敏感的任务，让 Agent 分四步走：(a) 生成 .mdj 的 JSON 结构描述 → (b) 人工确认节点和消息是否正确 → (c) 程序化写入 → (d) 用独立 Python 脚本逐条校验 R1-R4。如果没有步骤 (d) 的独立校验，仅凭 StarUML 视觉检查很容易漏掉 <code>end1</code>&#x2F;<code>end2</code> 格式错误或 <code>represent._type</code> 缺失。</p>
+</li>
+<li><p>让模型”解释而非决策”：对于架构权衡（如”是否将信用分检查抽象为 CreditChecker 类”），不让模型直接选方案，而是要求它列出两个方案的优势、劣势和在当前约束下的适配性。最终决策仍由我做出，但模型的对比分析让我更快地看到盲区。</p>
+</li>
+</ol>
+<h3 id="大模型的局限性"><a href="#大模型的局限性" class="headerlink" title="大模型的局限性"></a>大模型的局限性</h3><ul>
+<li>忽视评测规则：Agent 给的 UML 方案经常出现内部类，但实际评测不认内部类。这类课程特有的约束（不是 Java 语言的约束，而是评测系统的约束）模型无法从通用知识中推导，必须由我手动纠正。</li>
+<li>StarUML 格式细节盲区：Agent 生成的关联使用 <code>ends</code> 数组而非 StarUML 原生格式的 <code>end1</code>&#x2F;<code>end2</code>，导致重保存后丢失。这种工具级别的细节差异，模型往往在多次试错后才能”记住”——这也是为什么我把它固化为技能而非每次重新指导。</li>
+<li>过度设计倾向：Agent 曾建议引入 <code>CreditPolicy</code> 接口 + <code>DefaultCreditPolicy</code>&#x2F;<code>PremiumCreditPolicy</code> 实现，用于未来的策略扩展。但在一个仅需三种阈值判断（&gt;80、&gt;40、&gt;0）且迭代终点已知的场景中，这种抽象纯粹增加 UML 同步负担和 checkstyle 风险。</li>
+</ul>
+<h3 id="实践流程总结"><a href="#实践流程总结" class="headerlink" title="实践流程总结"></a>实践流程总结</h3><ol>
+<li>用 Agent 做 API diff：新旧 jar 包的 <code>javap</code> 输出对比，列出所有新增&#x2F;删除的方法和类</li>
+<li>人工确定架构决策后，让 Agent 审查是否与既有设计原则一致</li>
+<li>Agent 生成 .mdj 修改脚本，人工跑一遍验证 StarUML 打开不丢失数据</li>
+<li>独立校验脚本检查 R1-R4，Agent 辅助解读失败点并给出修复方案</li>
+</ol>
+<hr>
+<h2 id="四、四个单元架构设计思维的演进"><a href="#四、四个单元架构设计思维的演进" class="headerlink" title="四、四个单元架构设计思维的演进"></a>四、四个单元架构设计思维的演进</h2><p>回顾整个 2026 OO 课程，四个单元的架构设计思维呈现出明显的演进轨迹：</p>
+<h3 id="Unit1：语法驱动，分层解耦"><a href="#Unit1：语法驱动，分层解耦" class="headerlink" title="Unit1：语法驱动，分层解耦"></a>Unit1：语法驱动，分层解耦</h3><p>第一次作业就确立了 AST 解析前端与底层代数引擎分离的核心架构。<code>Lexer</code> → <code>Parser</code> → <code>Expr/Term/Factor</code> → <code>Poly</code> 的单向链路，使得后续两次迭代（括号嵌套、求导算子）可以在不重构的前提下完成。这一单元的思维核心是”把变化隔离在边界之内”——预见到需求会变（新增因子类型），所以用 <code>Factor</code> 接口和 <code>toPoly()</code> 方法抽象了解析与计算的边界。</p>
+<p>但问题也很明显：<code>Poly</code> 和 <code>Parser</code> 的耦合度达到全局最高的 12，<code>Poly</code> 类的响应数量高达 64。这说明我在追求功能可扩展性的同时，忽略了类的职责单一性。</p>
+<h3 id="Unit2：并发驱动，状态机建模"><a href="#Unit2：并发驱动，状态机建模" class="headerlink" title="Unit2：并发驱动，状态机建模"></a>Unit2：并发驱动，状态机建模</h3><p>电梯调度是并发编程的第一课。这一单元的架构思维从”对象关系”转向了”线程交互”。核心发现：在多线程系统中，类的职责划分不仅取决于业务逻辑，更取决于锁的粒度。<code>Strategy</code> 被设计为无状态纯函数（不持有任何锁），<code>WaitQueue</code> 封装了所有 <code>wait</code>&#x2F;<code>notify</code> 同步细节——这种”有锁的归信箱，无锁的归策略”的分层，是我在架构思维上最大的进步。</p>
+<h3 id="Unit3：规格驱动，接口契约"><a href="#Unit3：规格驱动，接口契约" class="headerlink" title="Unit3：规格驱动，接口契约"></a>Unit3：规格驱动，接口契约</h3><p>JML 单元的核心变化是从”我设计接口”转向”接口由规格给出”。架构设计的自由度被大幅压缩——类名、方法签名、异常类型全部由 JML 锁定。这一单元教会了我一件事：当接口被外部规格锁死时，架构设计的重心从”定义接口”转向了”优化实现”——选择 HashMap 还是 ArrayList、缓存哪些中间结果、如何组织内部辅助方法——这些是规格不限制的部分，也是人与人之间性能差异的来源。</p>
+<h3 id="Unit4：模型驱动，正向设计"><a href="#Unit4：模型驱动，正向设计" class="headerlink" title="Unit4：模型驱动，正向设计"></a>Unit4：模型驱动，正向设计</h3><p>第四单元是前三单元的反转：不再是先写代码再补 UML，而是先画类图再写代码。两阶类图的机制让我第一次体验到”设计先行”的完整流程。最大的感受是：正向建模不会减少编码工作量——事实上，同步 UML 的过程往往比写业务逻辑更耗时——但它显著减少了”因为设计缺陷导致的重构”。hw13 到 hw15 的三次迭代中，核心类（<code>LibraryManager</code>、<code>Book</code>、<code>User</code>）的关系模型从未改变，新增的类都是”追加”而非”修改”。</p>
+<h3 id="整体演进趋势"><a href="#整体演进趋势" class="headerlink" title="整体演进趋势"></a>整体演进趋势</h3><ul>
+<li>从关注”功能实现”（Unit1）到关注”职责边界”（Unit2）</li>
+<li>从关注”接口设计”（Unit3）到关注”设计与实现的追踪关系”（Unit4）</li>
+<li>从”代码即设计”到”设计先于代码”到”模型约束代码”</li>
+</ul>
+<hr>
+<h2 id="五、四个单元测试思维的演进"><a href="#五、四个单元测试思维的演进" class="headerlink" title="五、四个单元测试思维的演进"></a>五、四个单元测试思维的演进</h2><h3 id="Unit1：功能测试-互测对抗"><a href="#Unit1：功能测试-互测对抗" class="headerlink" title="Unit1：功能测试 + 互测对抗"></a>Unit1：功能测试 + 互测对抗</h3><p>测试手段主要是构造边界数据和复杂嵌套表达式，通过评测机批量对比输出。测试思维停留在”覆盖指导书规定的所有语法结构”层面。互测环节关注他人代码的架构缺陷——如果对方用全局字符串替换处理自定义函数，就构造深层嵌套的选择因子诱发 TLE。</p>
+<p>核心教训：测试数据的构造需要理解被测代码的实现方式，而非仅仅理解需求文档。</p>
+<h3 id="Unit2：并发测试-时序推演"><a href="#Unit2：并发测试-时序推演" class="headerlink" title="Unit2：并发测试 + 时序推演"></a>Unit2：并发测试 + 时序推演</h3><p>多线程 bugs 无法通过常规的功能测试复现。这单元我学会了”构造恶意时序”——利用睡眠间隙（<code>sleep(400)</code>）、TOCTOU 窗口和惊群效应来触发竞态条件。测试从”输入→输出”的静态验证转向了”输入→中间状态→输出”的动态验证。</p>
+<p>核心教训：并发测试的本质不是覆盖分支，而是覆盖线程交织的可能性空间。即使分支覆盖率 100%，一个 <code>notifyAll</code> 的位置偏移也可能导致 RTLE。</p>
+<h3 id="Unit3：规格测试-快照全接口覆盖"><a href="#Unit3：规格测试-快照全接口覆盖" class="headerlink" title="Unit3：规格测试 + 快照全接口覆盖"></a>Unit3：规格测试 + 快照全接口覆盖</h3><p>JML 单元的测试具备了一个关键特征：可验证性来自规格而非预期结果。<code>ensures</code> 子句可以直接翻译为 JUnit 断言，<code>assignable \nothing</code> 要求对所有可观察状态打快照并逐字段比对。这一单元的测试思维从”验证正确性”转向了”验证合规性”。</p>
+<p>核心教训：<code>assignable \nothing</code> 的快照必须覆盖接口暴露的每一个 getter，不能只覆盖”看着会变”的字段。hw11 的 recommendNthUp 测试中，followers、medals、hasReceived、influences 等 14 个维度的遗漏都是在多轮修正后才补齐的。</p>
+<h3 id="Unit4：评测驱动-一致性测试"><a href="#Unit4：评测驱动-一致性测试" class="headerlink" title="Unit4：评测驱动 + 一致性测试"></a>Unit4：评测驱动 + 一致性测试</h3><p>Unit4 的测试不是传统意义上的 JUnit，而是评测系统的 R1-R4 规则。R2 检查 UML 与代码的类和方法是否一致，R3 检查状态图&#x2F;顺序图中的消息是否有对应方法实现。这种”评测即测试”的模式对我的测试思维产生了新的影响：测试变得自动化但反馈周期变长（需要提交才能看到结果）。</p>
+<p>核心教训：评测规则本身也是”需求”的一部分。内部类 UML 不通过、<code>end1</code>&#x2F;<code>end2</code> 格式错误这些问题，在传统的单元测试思维中不会被关注，但在模型驱动开发中是实实在在的 bugs。</p>
+<h3 id="整体演进趋势-1"><a href="#整体演进趋势-1" class="headerlink" title="整体演进趋势"></a>整体演进趋势</h3><ul>
+<li>从”验证功能”到”验证合规”（Unit1 → Unit3）</li>
+<li>从”预期驱动”到”规格驱动”（Unit1&#x2F;2 → Unit3）</li>
+<li>从”静态验证”到”动态时序验证”再到”一致性验证”（Unit2 → Unit3 → Unit4）</li>
+<li>测试的范围逐步从”代码逻辑”扩展到”接口契约”再到”模型一致性”</li>
+</ul>
+<hr>
+<h2 id="六、课程收获"><a href="#六、课程收获" class="headerlink" title="六、课程收获"></a>六、课程收获</h2><p>回看这四个单元，OO 课程提供了一条完整的设计能力提升路径：</p>
+<p>表现：在课程开始前，我的编程思维是以”函数”和”过程”为中心的，类的存在更多是为了组织代码文件而非体现设计意图。</p>
+<p>原因：之前的编程经验主要集中在算法竞赛和小型脚本，缺乏对大规模、多迭代、有并发需求系统的设计训练。</p>
+<p>教训：经过四个月、四个单元、十二次作业的迭代，我收获了几条将长期影响我编程习惯的原则：</p>
+<ol>
+<li><p>边界比实现重要。Unit1 的 <code>Factor</code> 接口和 Unit2 的 <code>Strategy</code> 无状态类说明，好的设计不是写最多的代码，而是在正确的地方画边界。边界一旦确立，内部实现可以自由迭代。</p>
+</li>
+<li><p>约束是设计工具，不是限制。JML 的 <code>assignable</code> 和 UM的 @Trigger 看似是额外负担，但实际上是强制开发者回答”谁会改这个状态”、”状态如何转移”这两个核心设计问题。没有约束的自由设计往往导致职责散落。</p>
+</li>
+<li><p>评测驱动不等于测试思维。Unit4 的 R1-R4 评测教会我，在特定领域（如模型驱动开发），”通过评测”和”设计正确”是不完全等价的概念。评测覆盖不了架构质量，但可以驱动架构的精细化。</p>
+</li>
+<li><p>Agent 是放大镜，不是替代品。四个单元中，我越来越清楚地意识到：Agent 最不可替代的价值是”速度和不会疲劳”——它在 diff 对比、UML 一致性检查、API 变更检测上的效率远超人工。但架构决策的最终责任在开发者——Agent 可以列出方案的利弊，但无法理解课程约束、无法预测未来的迭代方向、无法判断一个抽象是否”过度”。</p>
+</li>
+<li><p>测试是设计的镜子。如果一个测试很难写，往往说明架构有问题——要么是职责边界不清导致需要 mock 太多依赖，要么是可观察状态暴露不足导致无法做 assignable nothing 验证。反过来，好的设计天然容易测试。</p>
+</li>
+</ol>
+<p>感谢老师和助教一个学期的付出，感谢互测中相互”折磨”的同学们。OO 课程的结束不是面向对象思维的终点，而是用这种思维去看待每一个软件系统的起点。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ztqs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2026/06/18/2026-6-18-unit4/">http://example.com/2026/06/18/2026-6-18-unit4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">123-Xiaotian's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/OOP/">OOP</a><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/UML/">UML</a><a class="post-meta__tags" href="/tags/%E6%AD%A3%E5%90%91%E5%BB%BA%E6%A8%A1/">正向建模</a><a class="post-meta__tags" href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">架构设计</a></div><div class="post-share"><div class="social-share" data-image="/img/hutao.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/02/2026-6-2-lab6/" title="操作系统 oslab6 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">操作系统 oslab6 实验报告</div></div><div class="info-2"><div class="info-item-1">lab6 实验报告思考题Thinking 6.1不关闭不会用到的管道端会导致进程永远阻塞。 以读者为例：读者期望在管道为空、写端已关闭时读到 EOF 并退出。但如果读者自己没有关闭写端，那么 pageref(wfd) 永远不会为 0，_pipe_is_closed 永远返回 0。读者每次检查都会认为”写者还在”，于是 syscall_yield() 让出 CPU，醒来后再检查、再 yield，进入死循环。写者端同理。 实质原因：恒等式 pageref(rfd) + pageref(wfd) = pageref(pipe) 要求两端引用都正确反映，多出来的未关闭 fd 破坏了等式语义。 Thinking 6.2只需交换父子进程中 close 和 read&#x2F;write 的操作对象：子进程关闭 p[0]（读端），操作 p[1]（写端）；父进程关闭 p[1]（写端），操作 p[0]（读端）。 修改后关键代码： 1234567891011if (pid == 0) &#123;    close(p[0]);                      // 子进程关读端    w...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/27/2026-5-27-unit3/" title="OOP Unit3 JML"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="info-item-2">OOP Unit3 JML</div></div><div class="info-2"><div class="info-item-1">Unit3 面向JML接口编程一、对JML和规格驱动开发的理解JML本质上是一份”合同”。它用形式化的数学语言描述了方法的前置条件（requires）、后置条件（ensures）、副作用范围（assignable）和异常行为（signals）。与自然语言文档不同，JML消除了歧义——它精确到每一个字段是否可改、每一个异常何时抛出、返回值如何计算。  规格驱动开发的核心思想：先签合同，再写代码。JML只描述做什么，不描述怎么做。  它带来了几个关键体验：  分离关注点：选择HashMap还是ArrayList、用DFS还是BFS，这些是实现自由，但结果必须符合规格。接口与实现的边界从未如此清晰。 可验证性：测试不再靠”猜”预期结果。ensures直接告诉你返回值应该满足什么等式，assignable \nothing直接告诉你方法不能改任何东西，测试逻辑从规格中自然推导。 维护成本：当规格变化（如hw10到hw11的getHeat从double改int），对比新旧JML就能精确知道哪些方法的哪些条件变了，不需要重新理解业务逻辑。  但同时，JML也有局限。\num_of、\min、...</div></div></div></a><a class="pagination-related" href="/2026/03/26/2026-3-26-unit1/" title="OOP Unit1 表达式解析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-26</div><div class="info-item-2">OOP Unit1 表达式解析</div></div><div class="info-2"><div class="info-item-1">Unit1 表达式解析基于度量的程序结构分析方法级别复杂度度量 (Method Complexity)   方法名 (Method) 基本复杂度 (ev(G)) 设计复杂度 (iv(G)) 圈复杂度 (v(G)) 代码行数 (LOC)    expr.DeriveFactor.DeriveFactor(Expr, int) 0 1 1 1   expr.DeriveFactor.toPoly() 3 3 3 3   expr.ExpFactor.ExpFactor(Factor, int) 0 1 1 1   expr.ExpFactor.toPoly() 0 1 1 1   expr.Expr.addTerm(Term) 0 1 1 1   expr.Expr.Expr() 0 1 1 1   expr.Expr.toPoly() 1 1 2 2   expr.ExprFactor.ExprFactor(int, Expr) 0 1 1 1   expr.ExprFactor.toPoly() 0 1 1 1   expr.Num.Num(BigInteger) 0 1 1 1...</div></div></div></a><a class="pagination-related" href="/2026/04/23/2026-4-23-unit2/" title="OOP Unit2 电梯调度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-23</div><div class="info-item-2">OOP Unit2 电梯调度</div></div><div class="info-2"><div class="info-item-1">Unit2 电梯调度同步块的设置和锁的选择 第一次迭代过程中，我将所有同步块都设在了waitQueue这一方法中，因为对于总队列totalQueue，该资源同时被分派线程和输入线程使用，对于每个电梯线程的等待队列，又同时被分派线程和电梯线程使用。并使用synchronized关键字，将waitQueue方法设为同步方法，从而保证同一时间只有一个线程可以访问该方法。将其他访问线程阻塞。  第二次迭代过程中，仍然将大部分同步字段加在waitQueue方法中。不同的是，由于增加了维修过程以及电梯分发逻辑，我们不得不在dispatch方法中也增加一个totalQueue的锁。原因是，当所有电梯线程同时进入维修的时候，为了防止轮询，我们需要再dispatch中加一个totalQueue的wait方法。而于此同时，我们需要再电梯线程完成维修的时候，拿到totalQueue的锁并唤醒dispatch。  第三次迭代过程的双轿厢电梯，则必须增加有关竞争楼层F2的锁，当一个轿厢申请前往F2的时候，必须获得这个锁，当轿厢离开F2的时候，才能释放这个锁。否则，另一个轿厢无法获得F2的锁，从而无法前往F...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/hutao.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ztqs</div><div class="author-info-description">h1w</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Unit4-%E6%AD%A3%E5%90%91%E5%BB%BA%E6%A8%A1%E4%B8%8E%E5%9B%BE%E4%B9%A6%E9%A6%86%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.</span> <span class="toc-text">Unit4 正向建模与图书馆管理系统</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%AD%A3%E5%90%91%E5%BB%BA%E6%A8%A1%E4%B8%8E%E4%B8%A4%E9%98%B6%E7%B1%BB%E5%9B%BE"><span class="toc-number">1.1.</span> <span class="toc-text">一、正向建模与两阶类图</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%A4%E9%98%B6%E7%B1%BB%E5%9B%BE%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">两阶类图的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%90%91%E5%BB%BA%E6%A8%A1%E4%B8%8E%E5%8F%8D%E5%90%91%E5%BB%BA%E6%A8%A1%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">1.1.2.</span> <span class="toc-text">正向建模与反向建模的对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E-UML-%E6%A8%A1%E5%9E%8B%E8%BF%BD%E8%B8%AA"><span class="toc-number">1.2.</span> <span class="toc-text">二、架构设计与 UML 模型追踪</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E4%BB%A3%E7%A0%81%E6%9E%B6%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">最终代码架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%B8%8E-UML-%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%BF%BD%E8%B8%AA%E5%85%B3%E7%B3%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">代码与 UML 模型的追踪关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hw14-%E2%86%92-hw15-%E6%9E%B6%E6%9E%84%E6%89%A9%E5%B1%95%E5%88%86%E6%9E%90"><span class="toc-number">1.2.3.</span> <span class="toc-text">hw14 → hw15 架构扩展分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%BE%85%E5%8A%A9%E6%AD%A3%E5%90%91%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.3.</span> <span class="toc-text">三、大模型辅助正向建模</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%88%86%E5%B7%A5"><span class="toc-number">1.3.1.</span> <span class="toc-text">任务分工</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AE%8C%E6%88%90%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%BB%BB%E5%8A%A1%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">1.3.2.</span> <span class="toc-text">引导大模型完成架构设计任务的方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">1.3.3.</span> <span class="toc-text">大模型的局限性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E6%B5%81%E7%A8%8B%E6%80%BB%E7%BB%93"><span class="toc-number">1.3.4.</span> <span class="toc-text">实践流程总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%9B%9B%E4%B8%AA%E5%8D%95%E5%85%83%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%80%9D%E7%BB%B4%E7%9A%84%E6%BC%94%E8%BF%9B"><span class="toc-number">1.4.</span> <span class="toc-text">四、四个单元架构设计思维的演进</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit1%EF%BC%9A%E8%AF%AD%E6%B3%95%E9%A9%B1%E5%8A%A8%EF%BC%8C%E5%88%86%E5%B1%82%E8%A7%A3%E8%80%A6"><span class="toc-number">1.4.1.</span> <span class="toc-text">Unit1：语法驱动，分层解耦</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit2%EF%BC%9A%E5%B9%B6%E5%8F%91%E9%A9%B1%E5%8A%A8%EF%BC%8C%E7%8A%B6%E6%80%81%E6%9C%BA%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.4.2.</span> <span class="toc-text">Unit2：并发驱动，状态机建模</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit3%EF%BC%9A%E8%A7%84%E6%A0%BC%E9%A9%B1%E5%8A%A8%EF%BC%8C%E6%8E%A5%E5%8F%A3%E5%A5%91%E7%BA%A6"><span class="toc-number">1.4.3.</span> <span class="toc-text">Unit3：规格驱动，接口契约</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit4%EF%BC%9A%E6%A8%A1%E5%9E%8B%E9%A9%B1%E5%8A%A8%EF%BC%8C%E6%AD%A3%E5%90%91%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.4.4.</span> <span class="toc-text">Unit4：模型驱动，正向设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%BC%94%E8%BF%9B%E8%B6%8B%E5%8A%BF"><span class="toc-number">1.4.5.</span> <span class="toc-text">整体演进趋势</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%9B%9B%E4%B8%AA%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%80%9D%E7%BB%B4%E7%9A%84%E6%BC%94%E8%BF%9B"><span class="toc-number">1.5.</span> <span class="toc-text">五、四个单元测试思维的演进</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit1%EF%BC%9A%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95-%E4%BA%92%E6%B5%8B%E5%AF%B9%E6%8A%97"><span class="toc-number">1.5.1.</span> <span class="toc-text">Unit1：功能测试 + 互测对抗</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit2%EF%BC%9A%E5%B9%B6%E5%8F%91%E6%B5%8B%E8%AF%95-%E6%97%B6%E5%BA%8F%E6%8E%A8%E6%BC%94"><span class="toc-number">1.5.2.</span> <span class="toc-text">Unit2：并发测试 + 时序推演</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit3%EF%BC%9A%E8%A7%84%E6%A0%BC%E6%B5%8B%E8%AF%95-%E5%BF%AB%E7%85%A7%E5%85%A8%E6%8E%A5%E5%8F%A3%E8%A6%86%E7%9B%96"><span class="toc-number">1.5.3.</span> <span class="toc-text">Unit3：规格测试 + 快照全接口覆盖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unit4%EF%BC%9A%E8%AF%84%E6%B5%8B%E9%A9%B1%E5%8A%A8-%E4%B8%80%E8%87%B4%E6%80%A7%E6%B5%8B%E8%AF%95"><span class="toc-number">1.5.4.</span> <span class="toc-text">Unit4：评测驱动 + 一致性测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%BC%94%E8%BF%9B%E8%B6%8B%E5%8A%BF-1"><span class="toc-number">1.5.5.</span> <span class="toc-text">整体演进趋势</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%AF%BE%E7%A8%8B%E6%94%B6%E8%8E%B7"><span class="toc-number">1.6.</span> <span class="toc-text">六、课程收获</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/18/2026-6-18-unit4/" title="OOP Unit4 正向建模与图书馆管理系统">OOP Unit4 正向建模与图书馆管理系统</a><time datetime="2026-06-18T11:23:00.000Z" title="发表于 2026-06-18 19:23:00">2026-06-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/02/2026-6-2-lab6/" title="操作系统 oslab6 实验报告">操作系统 oslab6 实验报告</a><time datetime="2026-06-02T09:45:00.000Z" title="发表于 2026-06-02 17:45:00">2026-06-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/2026-5-27-unit3/" title="OOP Unit3 JML">OOP Unit3 JML</a><time datetime="2026-05-27T14:31:00.000Z" title="发表于 2026-05-27 22:31:00">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/22/2026-5-22-lab5/" title="操作系统 oslab5 实验报告">操作系统 oslab5 实验报告</a><time datetime="2026-05-22T13:48:00.000Z" title="发表于 2026-05-22 21:48:00">2026-05-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/2026-5-7-lab4/" title="操作系统 oslab4 实验报告">操作系统 oslab4 实验报告</a><time datetime="2026-05-07T15:19:00.000Z" title="发表于 2026-05-07 23:19:00">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Ztqs</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

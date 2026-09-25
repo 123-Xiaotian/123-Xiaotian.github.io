@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>操作系统 oslab4 实验报告 | 123-Xiaotian's Blog</title><meta name="author" content="Ztqs"><meta name="copyright" content="Ztqs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="lab4 实验报告思考题Thinking 4.1 1.当异常发生时，MIPS CPU 跳转到异常入口。在 kern&#x2F;entry.S 中，SAVE_ALL 宏负责保存所有通用寄存器到内核栈上的 Trapframe 结构体中。使用 $k0 和 $k1 这两个寄存器作为临时寄存器,SAVE_ALL 将各个寄存器依次存入内核栈。保存完成后，栈指针 $sp 指向 Trapframe 底部，后续 C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统 oslab4 实验报告">
+<meta property="og:url" content="http://example.com/2026/05/07/2026-5-7-lab4/index.html">
+<meta property="og:site_name" content="123-Xiaotian&#39;s Blog">
+<meta property="og:description" content="lab4 实验报告思考题Thinking 4.1 1.当异常发生时，MIPS CPU 跳转到异常入口。在 kern&#x2F;entry.S 中，SAVE_ALL 宏负责保存所有通用寄存器到内核栈上的 Trapframe 结构体中。使用 $k0 和 $k1 这两个寄存器作为临时寄存器,SAVE_ALL 将各个寄存器依次存入内核栈。保存完成后，栈指针 $sp 指向 Trapframe 底部，后续 C">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/hutao.jpg">
+<meta property="article:published_time" content="2026-05-07T15:19:00.000Z">
+<meta property="article:modified_time" content="2026-09-25T14:45:26.184Z">
+<meta property="article:author" content="Ztqs">
+<meta property="article:tag" content="Lab4">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/hutao.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "操作系统 oslab4 实验报告",
+  "url": "http://example.com/2026/05/07/2026-5-7-lab4/",
+  "image": "http://example.com/img/hutao.jpg",
+  "datePublished": "2026-05-07T15:19:00.000Z",
+  "dateModified": "2026-09-25T14:45:26.184Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ztqs",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2026/05/07/2026-5-7-lab4/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '操作系统 oslab4 实验报告',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" /><style> body, div, a, p, h1, h2, h3, h4, h5, h6 { font-family: "LXGW WenKai Screen", sans-serif !important; } #page-header { background-attachment: fixed !important; } </style><meta name="generator" content="Hexo 8.1.1"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/hutao3.png);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/hutao3.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">123-Xiaotian's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">操作系统 oslab4 实验报告</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">操作系统 oslab4 实验报告</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-07T15:19:00.000Z" title="发表于 2026-05-07 23:19:00">2026-05-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-25T14:45:26.184Z" title="更新于 2026-09-25 22:45:26">2026-09-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/OS/">OS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="lab4-实验报告"><a href="#lab4-实验报告" class="headerlink" title="lab4 实验报告"></a>lab4 实验报告</h1><h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><h3 id="Thinking-4-1"><a href="#Thinking-4-1" class="headerlink" title="Thinking 4.1"></a>Thinking 4.1</h3><ul>
+<li><p>1.当异常发生时，MIPS CPU 跳转到异常入口。在 kern&#x2F;entry.S 中，SAVE_ALL 宏负责保存所有通用寄存器到内核栈上的 Trapframe 结构体中。使用 $k0 和 $k1 这两个寄存器作为临时寄存器,SAVE_ALL 将各个寄存器依次存入内核栈。保存完成后，栈指针 $sp 指向 Trapframe 底部，后续 C 代码通过 struct Trapframe *tf 访问所有原始寄存器值。</p>
+</li>
+<li><p>2.不一定，由于程序不保证一直维护$a0到$a3寄存器的值，可能有些内容需要在栈内预留的空间（Trapframe）读取</p>
+</li>
+<li><p>3.参数重构。do_syscall 函数充当了”翻译层”：</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">用户态:  msyscall(sysno, arg1, arg2, arg3, arg4, arg5)</span><br><span class="line">                │</span><br><span class="line">         $a0=sysno, $a1=arg1, $a2=arg2, $a3=arg3, 栈=[arg4, arg5]</span><br><span class="line">                │  syscall 指令</span><br><span class="line">                ▼</span><br><span class="line">内核态:  do_syscall(<span class="keyword">struct</span> Trapframe *tf) &#123;</span><br><span class="line">           <span class="comment">// 从 Trapframe 还原参数</span></span><br><span class="line">           <span class="type">int</span> sysno   = tf-&gt;regs[<span class="number">4</span>];           <span class="comment">// 来自原 $a0</span></span><br><span class="line">           u_int arg1  = tf-&gt;regs[<span class="number">5</span>];           <span class="comment">// 来自原 $a1</span></span><br><span class="line">           u_int arg2  = tf-&gt;regs[<span class="number">6</span>];           <span class="comment">// 来自原 $a2</span></span><br><span class="line">           u_int arg3  = tf-&gt;regs[<span class="number">7</span>];           <span class="comment">// 来自原 $a3</span></span><br><span class="line">           u_int arg4  = (u_int)(tf-&gt;regs[<span class="number">29</span>] + <span class="number">16</span>);  <span class="comment">// 栈上第5个参数</span></span><br><span class="line">           u_int arg5  = (u_int)(tf-&gt;regs[<span class="number">29</span>] + <span class="number">20</span>);  <span class="comment">// 栈上第6个参数</span></span><br><span class="line"></span><br><span class="line">           func = syscall_table[sysno];</span><br><span class="line">           tf-&gt;regs[<span class="number">2</span>] = func(arg1, arg2, arg3, arg4, arg5);  <span class="comment">// 原样传入</span></span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>4.内核修改了两处：<ol>
+<li>$v0 被改变 → 从内核返回后，syscall_* 函数（以及更上层的 fork、ipc_recv 等）可以通过读取 $v0 获得系统调用的返回值。</li>
+<li>EPC + 4 → 返回用户态后，PC 指向 syscall 指令的下一条指令，程序继续正常执行，就像 syscall 是一条普通的函数调用一样。如果不加 4，就会陷入死循环反复执行 syscall。</li>
+</ol>
+</li>
+</ul>
+<h3 id="Thinking-4-2"><a href="#Thinking-4-2" class="headerlink" title="Thinking 4.2"></a>Thinking 4.2</h3><p>我们在利用ENVX获取envs数组下标的时候，是直接按后10位索引的，并未判读高位计数器是否一致，如果没有这步判断，由于envs槽位可以复用，可能导致之前希望访问的envid对应的进程已经被回收了，但是我们用相同的下标取出了一个新的存入相同槽位的进程，如果不进行判断，就会错误的进行判断。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">假设 NENV=<span class="number">1024</span>，LOG2NENV=<span class="number">10</span>，ENVX 取低 <span class="number">10</span> 位。</span><br><span class="line">时刻 <span class="number">1</span>: 创建进程 A</span><br><span class="line">  mkenvid → i=<span class="number">1</span>, 槽位=<span class="number">3</span></span><br><span class="line">  envs[<span class="number">3</span>].env_id = (<span class="number">1</span> &lt;&lt; <span class="number">11</span>) | <span class="number">3</span> = <span class="number">2051</span></span><br><span class="line"></span><br><span class="line">时刻 <span class="number">2</span>: 进程 A 完成任务，被销毁</span><br><span class="line">  envs[<span class="number">3</span>].env_status = ENV_FREE</span><br><span class="line">  但 envs[<span class="number">3</span>].env_id 仍是 <span class="number">2051</span></span><br><span class="line"></span><br><span class="line">时刻 <span class="number">3</span>: 创建进程 B</span><br><span class="line">  mkenvid → i=<span class="number">2</span>, 槽位=<span class="number">3</span> (复用！)</span><br><span class="line">  envs[<span class="number">3</span>].env_id = (<span class="number">2</span> &lt;&lt; <span class="number">11</span>) | <span class="number">3</span> = <span class="number">4099</span></span><br><span class="line"></span><br><span class="line">时刻 <span class="number">4</span>: 某个老代码手里还攥着进程 A 的旧 envid = <span class="number">2051</span></span><br><span class="line">  envid2env(<span class="number">2051</span>, ...)</span><br><span class="line">    ENVX(<span class="number">2051</span>) = <span class="number">3</span>    → 指向 envs[<span class="number">3</span>]</span><br><span class="line">    envs[<span class="number">3</span>] 现在存的是进程 B，env_id = <span class="number">4099</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Thinking-4-3"><a href="#Thinking-4-3" class="headerlink" title="Thinking 4.3"></a>Thinking 4.3</h3><p>我们注意到，即使是第一个进程，由于计数器的自增性质，mkenvid不会返回一个为0的envid。但是envid2env函数中，我们直接将envid与0进行比较，并在envid为0的时候直接将curenv赋给penv，这里实际上我们是将0这个id直接规定为进程自身,系统调用号本身就很紧张，能少传一个参数就少传一个。让envid2env认0等于自己，所有系统调用都可以直接用这个统一的入口，不需要每个系统调用函数里都写一遍”如果 envid是0就换成 curenv”。</p>
+<h3 id="Thinking-4-4"><a href="#Thinking-4-4" class="headerlink" title="Thinking 4.4"></a>Thinking 4.4</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ gcc fork_test.c &amp;&amp; ./a.out</span><br><span class="line">Before fork, var = 1.</span><br><span class="line">After fork, var = 1.</span><br><span class="line">After fork, var = 1.</span><br><span class="line">parent got 158141, var = 1, pid: 158140</span><br><span class="line">$ child got 0, var = 2, pid: 158141</span><br></pre></td></tr></table></figure>
+
+<p>选C，fork只被父进程调用了一次，不存在所谓调用两次，A、B、D选项错误，父进程返回子进程的envid，子进程返回0，因此C选项正确。</p>
+<h3 id="Thinking-4-5"><a href="#Thinking-4-5" class="headerlink" title="Thinking 4.5"></a>Thinking 4.5</h3><ul>
+<li>1.子进程与父进程属于不同的进程，因此一个进程发生异常的时候，不应影响另一进程的运行，因此不能共享异常栈。另外，异常栈本身是异常处理的临时空间，不能在异常处理内部再次出发异常处理，如果使用COW，在进行异常处理的时候，会再次触发TLB Mod异常，导致无限递归死循环。</li>
+<li>2.不同进程的页表应当是独立的，否则子进程可能会访问到父进程的物理内存，导致数据混乱。且UVPT映射到的是页表本身，这些数据在父进程和子进程里物理地址不同、内容也不同，<br>根本不存在”共享”或”COW”的意义。如果强行 duppage，子进程的 env_pgdir 指针指向子进程自己的页目录物理页，但子进程通过 VPT 读到的却是父进程的页目录，数据完全不一致。</li>
+</ul>
+<h3 id="Thinking-4-6"><a href="#Thinking-4-6" class="headerlink" title="Thinking 4.6"></a>Thinking 4.6</h3><ul>
+<li>1.vpt指向了该进程所有页表虚拟地址的首地址，vpd指向了该进程页目录虚拟地址的首地址，可以通过vpt + 第n个页表的索引 &lt;&lt; 12 + Offset &lt;&lt; 2的方式访问对应页表的页表项，通过vpd + Offset &lt;&lt; 2的方式访问对应页目录的页目录项。</li>
+<li>2.因为实现了页表自映射，所以MMU会自动通过重定向找到对应的页表项的物理地址从而实现修改，且因为页表的虚拟地址放在了用户态的虚拟地址空间，所以用户态程序可以直接访问页表，而不用陷入内核态。</li>
+<li>3.这个设计导致了一个递归效果：<br>  要翻译 UVPT 区域的虚拟地址：<br>MMU 第一级查页目录 → 命中自映射 PDE → PDE 指向 PDbase<br>→ MMU 把第二级也当成页目录来查（而不是页表）<br>→ 于是原本的”页表项”位置实际读出的是”页目录项”<br>→ 效果：页目录被当成一个巨大的页表来用<br>→ 所有页表项在 UVPT 区域连续可见<br>  这就是”自映射”——页目录的某一个 PDE 的值是自己的物理地址，递归套了一层，使得页表项对用户空间可见。</li>
+<li>4.不能，进程对于自己页表的操作权限是只读，不能修改。</li>
+</ul>
+<h3 id="Thinking-4-7"><a href="#Thinking-4-7" class="headerlink" title="Thinking 4.7"></a>Thinking 4.7</h3><ul>
+<li>1.正常栈 va_X 是 COW 页 → 进程写入 → TLB Mod<br>→ do_tlb_mod: 保存现场到 UXSTACK(高位)<br>→ 返回用户态 cow_entry<br>  cow_entry 执行中:<br>→ syscall_mem_alloc(0, UCOW, PTE_D)  ← UCOW 是新映射的，TLB 里可能没有<br>→ 访问 UCOW → TLB Miss（不是 TLB Mod，但也走异常）<br>  → do_tlb_refill: 填 TLB<br>  → 返回 UCOW 继续<br>→ memcpy(UCOW, va_X, PGSIZE)  ← 读 va_X 正常（COW 只拦截写），写 UCOW 正常（PTE_D&#x3D;1）<br>→ syscall_mem_map(…)         ← 可能再触发<br>  如果 cow_entry 处理过程中又碰到另一个 COW 页被写入:<br>→ 新的 TLB Mod<br>  → do_tlb_mod: 把当前现场保存到 UXSTACK(低位，比刚才低一个 Trapframe)<br>  → 再次返回 cow_entry（嵌套）<br>  → 处理完，syscall_set_trapframe 恢复外层现场<br>  本质：UXSTACK 上形成 Trapframe 链，每层异常往里压一个，像栈帧一样。 重入的不是”同一个异常”，而是”处理过程中又遇到新的页写入异常”。</li>
+<li>2.因为MOS的微内核设计，页面复制和COW处理是在用户态完成的，而用户态无法访问内核空间的Trapframe，因此内核需要复制一份到用户的异常处理栈内。 cow_entry 最后必须调用 syscall_set_trapframe(0, tf) 来恢复现场。这个 tf 指针必须指向用户态能访问的内存，所以内核在 do_tlb_mod 里提前复制到 UXSTACK，用户态 cow_entry 直接拿过来用，最后原样传给内核恢复。</li>
+</ul>
+<h3 id="Thinking-4-8"><a href="#Thinking-4-8" class="headerlink" title="Thinking 4.8"></a>Thinking 4.8</h3><p>内核更小，运行压力更小。策略灵活， 页写入异常的处理函数存在 env-&gt;env_user_tlb_mod_entry 里，该函数是由用户程序自己通过系统调用设的，这意味着不同进程可以用不同的异常处理函数。且fork 本身就在用户态实现的（user&#x2F;lib&#x2F;fork.c），COW 处理也是用户态。两层配合不需要跨特权级来回跳。</p>
+<h3 id="Thinking-4-9"><a href="#Thinking-4-9" class="headerlink" title="Thinking 4.9"></a>Thinking 4.9</h3><p>必须先注册 cow_entry，否则 duppage 自己会把自己炸死。 duppage 遍历的是所有可写用户页，包括 duppage 自身正在跑的栈。设 COW 的过程中把脚下的栈板也锁了，一脚踩下去没有 cow_entry 来救，人就掉下去了。</p>
+<h2 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h2><h3 id="exam难点分析"><a href="#exam难点分析" class="headerlink" title="exam难点分析"></a>exam难点分析</h3><p>本次exam考察较为简单的系统调用，主要难点在于熟悉系统调用链路，难度总体不算高</p>
+<h3 id="extra难点分析"><a href="#extra难点分析" class="headerlink" title="extra难点分析"></a>extra难点分析</h3><p>本次extra难点主要在于对于题目的理解，比如entry为0时取消设置的意思以及后续申请空间与队列填入的先后顺序的问题，由于教程比较详细，除此之外难点并不多。</p>
+<h2 id="实验体会"><a href="#实验体会" class="headerlink" title="实验体会"></a>实验体会</h2><p>应当加深对于系统调用链路以及kern，user态切换部分的认识。</p>
+<h2 id="原创说明"><a href="#原创说明" class="headerlink" title="原创说明"></a>原创说明</h2><p>本文档均为原创，仅参考OS指导书以及实验内容。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ztqs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2026/05/07/2026-5-7-lab4/">http://example.com/2026/05/07/2026-5-7-lab4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">123-Xiaotian's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><a class="post-meta__tags" href="/tags/Lab4/">Lab4</a></div><div class="post-share"><div class="social-share" data-image="/img/hutao.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/22/2026-5-22-lab5/" title="操作系统 oslab5 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">操作系统 oslab5 实验报告</div></div><div class="info-2"><div class="info-item-1">lab5 实验报告思考题Thinking 5.1不使用kseg0，而是使用kseg1的核心原因只有一条：Cache。  从读的方面来看，由于硬件状态独立于CPU运行更新，外设修改自身状态寄存器的时候，会自动修改自身状态，而cpu不知道这种修改，会去读Cache中缓存的状态寄存器，因此可能导致死循环的轮询。 从写的角度来看，由于现代cpu的write buffer会将多次写入合并为一次，如在 IDE 驱动中，你需要通过循环连续向数据寄存器（同一个物理地址）写入 512 字节的数据 。如果经过 Cache，CPU 可能会把这些写入合并，最终硬件只收到了最后几个字节，导致数据丢失。另外，内存的读写是“无副作用”的（读多少次值都不变）。但外设寄存器通常具有副作用。例如，读取某个串口的接收缓冲寄存器，可能会自动清空该寄存器并触发硬件拉取下一个字符 。如果CPU因为Cache命中而没有真正发起总线读取，硬件的“下一个字符”动作就不会被触发。 对于串口：它有接收和发送FIFO。如果发生上述的写合并或读缓存，可能会导致终端输出乱码、丢失字符，或者敲击键盘后毫无反应。  对于 IDE 磁盘：它的操...</div></div></div></a><a class="pagination-related" href="/2026/04/23/2026-4-23-unit2/" title="OOP Unit2 电梯调度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">OOP Unit2 电梯调度</div></div><div class="info-2"><div class="info-item-1">Unit2 电梯调度同步块的设置和锁的选择 第一次迭代过程中，我将所有同步块都设在了waitQueue这一方法中，因为对于总队列totalQueue，该资源同时被分派线程和输入线程使用，对于每个电梯线程的等待队列，又同时被分派线程和电梯线程使用。并使用synchronized关键字，将waitQueue方法设为同步方法，从而保证同一时间只有一个线程可以访问该方法。将其他访问线程阻塞。  第二次迭代过程中，仍然将大部分同步字段加在waitQueue方法中。不同的是，由于增加了维修过程以及电梯分发逻辑，我们不得不在dispatch方法中也增加一个totalQueue的锁。原因是，当所有电梯线程同时进入维修的时候，为了防止轮询，我们需要再dispatch中加一个totalQueue的wait方法。而于此同时，我们需要再电梯线程完成维修的时候，拿到totalQueue的锁并唤醒dispatch。  第三次迭代过程的双轿厢电梯，则必须增加有关竞争楼层F2的锁，当一个轿厢申请前往F2的时候，必须获得这个锁，当轿厢离开F2的时候，才能释放这个锁。否则，另一个轿厢无法获得F2的锁，从而无法前往F...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/04/19/2026-4-19-lab3/" title="操作系统 oslab3 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-19</div><div class="info-item-2">操作系统 oslab3 实验报告</div></div><div class="info-2"><div class="info-item-1">lab3 实验报告思考题Thinking 3.1我们知道PDX(UVPT)是511，也就是说，e-&gt;env_pgdir[PDX(UVPT)] &#x3D; PADDR(e-&gt;env_pgdir) | PTE_V;这步操作实际上是把env_pgdir的第511项赋值为env_pgdir的物理地址，那么为什么需要这样做呢？显然，这是为了构成自映射。这一步让用户态可以从0x7fc00000到0x7ffff000的地址空间中通过自映射访问到所有的页表项（包括511项的页表项和env_pgdir本身）。 Thinking 3.2data参数来源于load_icode()函数中对于elf_load_seg()函数的调用，这里给data传的是struct Env* e指针，也即当前操作pcb结构体的指针。这个参数不可以没有，因为load_icode_mapper()函数需要data参数保存的上下文找到该进程的pgdir和asid，来完成从va到物理页面的映射 Thinking 3.3elf_load_seg()函数中，如果一开始传入的va没有页面对齐，需要先复制一个不足整一页的部分...</div></div></div></a><a class="pagination-related" href="/2026/05/22/2026-5-22-lab5/" title="操作系统 oslab5 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-22</div><div class="info-item-2">操作系统 oslab5 实验报告</div></div><div class="info-2"><div class="info-item-1">lab5 实验报告思考题Thinking 5.1不使用kseg0，而是使用kseg1的核心原因只有一条：Cache。  从读的方面来看，由于硬件状态独立于CPU运行更新，外设修改自身状态寄存器的时候，会自动修改自身状态，而cpu不知道这种修改，会去读Cache中缓存的状态寄存器，因此可能导致死循环的轮询。 从写的角度来看，由于现代cpu的write buffer会将多次写入合并为一次，如在 IDE 驱动中，你需要通过循环连续向数据寄存器（同一个物理地址）写入 512 字节的数据 。如果经过 Cache，CPU 可能会把这些写入合并，最终硬件只收到了最后几个字节，导致数据丢失。另外，内存的读写是“无副作用”的（读多少次值都不变）。但外设寄存器通常具有副作用。例如，读取某个串口的接收缓冲寄存器，可能会自动清空该寄存器并触发硬件拉取下一个字符 。如果CPU因为Cache命中而没有真正发起总线读取，硬件的“下一个字符”动作就不会被触发。 对于串口：它有接收和发送FIFO。如果发生上述的写合并或读缓存，可能会导致终端输出乱码、丢失字符，或者敲击键盘后毫无反应。  对于 IDE 磁盘：它的操...</div></div></div></a><a class="pagination-related" href="/2026/04/01/2026-4-1-lab1/" title="操作系统 oslab1 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-01</div><div class="info-item-2">操作系统 oslab1 实验报告</div></div><div class="info-2"><div class="info-item-1">lab1 实验报告思考题Thinking 1.1创建文件hello.c,编写如下代码： 123456#include &lt;stdio.h&gt;int main()&#123;    puts(&quot;Hello World!&quot;);    return 0;&#125;  利用x86编译出原生汇编文件，阅读elf头可确定文件系统架构为x86-64。$ gcc -g -c hello.c -o hello_x86.o$ readelf -h hello_x86.oELF 头：  Magic：   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00  类别:                              ELF64  数据:                              2 补码，小端序 (little endian)  Version:                           1 (current)  OS&#x2F;ABI:                            UN...</div></div></div></a><a class="pagination-related" href="/2026/06/02/2026-6-2-lab6/" title="操作系统 oslab6 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-02</div><div class="info-item-2">操作系统 oslab6 实验报告</div></div><div class="info-2"><div class="info-item-1">lab6 实验报告思考题Thinking 6.1不关闭不会用到的管道端会导致进程永远阻塞。 以读者为例：读者期望在管道为空、写端已关闭时读到 EOF 并退出。但如果读者自己没有关闭写端，那么 pageref(wfd) 永远不会为 0，_pipe_is_closed 永远返回 0。读者每次检查都会认为”写者还在”，于是 syscall_yield() 让出 CPU，醒来后再检查、再 yield，进入死循环。写者端同理。 实质原因：恒等式 pageref(rfd) + pageref(wfd) = pageref(pipe) 要求两端引用都正确反映，多出来的未关闭 fd 破坏了等式语义。 Thinking 6.2只需交换父子进程中 close 和 read&#x2F;write 的操作对象：子进程关闭 p[0]（读端），操作 p[1]（写端）；父进程关闭 p[1]（写端），操作 p[0]（读端）。 修改后关键代码： 1234567891011if (pid == 0) &#123;    close(p[0]);                      // 子进程关读端    w...</div></div></div></a><a class="pagination-related" href="/2026/04/07/2026-4-7-lab2/" title="操作系统 oslab2 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-07</div><div class="info-item-2">操作系统 oslab2 实验报告</div></div><div class="info-2"><div class="info-item-1">lab2 实验报告思考题Thinking 2.1C语言中，指针变量中存储的地址被视为虚拟地址，MIPS中lw和sw指令使用的同样是虚拟地址。 Thinking 2.2 2.2.1 由于宏是字符串替换，因此一套宏代码可支持任意数据类型，无需为每种类型重写链表。且宏增删改查逻辑可以只写一次，大幅提高代码复用率。宏只处理链表结构，不关心节点数据类型，模块化强。编译期展开，效率高，适合底层系统开发。一处修改，所有使用处自动更新，可维护性极强。  2.2.2 三种链表操作性能对比      操作 单向链表 双向链表（实验用） 循环链表    头部插入 O(1) O(1) O(1)   尾部插入 O(n) &#x2F; 带尾指针 O(1) O(1) O(1)   已知节点后插入 O(1) O(1) O(1)   已知节点前插入 O(n)（要找前驱） O(1) O(1)   删除已知节点 O(n)（要找前驱） O(1) O(1)   遍历方向 仅向前 双向 双向&#x2F;循环   Thinking 2.3选B 123456789struct Page_list &#123;    struc...</div></div></div></a><a class="pagination-related" href="/2026/03/19/2026-03-19-lab0/" title="操作系统 oslab0 实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-19</div><div class="info-item-2">操作系统 oslab0 实验报告</div></div><div class="info-2"><div class="info-item-1">lab0实验报告思考题Thinking 0.1Untracted.txt中的内容：位于分支 master 尚无提交 未跟踪的文件:  （使用 “git add &lt;文件&gt;…” 以包含要提交的内容）        README.txt        Untracted.txt Staged.txt中的内容：位于分支 master 尚无提交 要提交的变更：  （使用 “git rm –cached &lt;文件&gt;…” 以取消暂存）        新文件：   README.txt Modified.txt中的内容： 位于分支 master尚未暂存以备提交的变更：  （使用 “git add &lt;文件&gt;…” 更新要提交的内容）  （使用 “git restore &lt;文件&gt;…” 丢弃工作区的改动）        修改：     README.txt 结果不一样，第一次add的时候给出的是要提交的变更，第二次给出的是尚未暂存以备提交的变更，第二次必须得再add一次把修改添加到暂存区才能正确提交。 Thinking 0.2add the file 是 g...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/hutao.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ztqs</div><div class="author-info-description">h1w</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#lab4-%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">lab4 实验报告</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">思考题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-1"><span class="toc-number">1.1.1.</span> <span class="toc-text">Thinking 4.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-2"><span class="toc-number">1.1.2.</span> <span class="toc-text">Thinking 4.2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-3"><span class="toc-number">1.1.3.</span> <span class="toc-text">Thinking 4.3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-4"><span class="toc-number">1.1.4.</span> <span class="toc-text">Thinking 4.4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-5"><span class="toc-number">1.1.5.</span> <span class="toc-text">Thinking 4.5</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-6"><span class="toc-number">1.1.6.</span> <span class="toc-text">Thinking 4.6</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-7"><span class="toc-number">1.1.7.</span> <span class="toc-text">Thinking 4.7</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-8"><span class="toc-number">1.1.8.</span> <span class="toc-text">Thinking 4.8</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Thinking-4-9"><span class="toc-number">1.1.9.</span> <span class="toc-text">Thinking 4.9</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%BE%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">难点分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#exam%E9%9A%BE%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.2.1.</span> <span class="toc-text">exam难点分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#extra%E9%9A%BE%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">extra难点分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E4%BD%93%E4%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">实验体会</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E8%AF%B4%E6%98%8E"><span class="toc-number">1.4.</span> <span class="toc-text">原创说明</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/18/2026-6-18-unit4/" title="OOP Unit4 正向建模与图书馆管理系统">OOP Unit4 正向建模与图书馆管理系统</a><time datetime="2026-06-18T11:23:00.000Z" title="发表于 2026-06-18 19:23:00">2026-06-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/02/2026-6-2-lab6/" title="操作系统 oslab6 实验报告">操作系统 oslab6 实验报告</a><time datetime="2026-06-02T09:45:00.000Z" title="发表于 2026-06-02 17:45:00">2026-06-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/2026-5-27-unit3/" title="OOP Unit3 JML">OOP Unit3 JML</a><time datetime="2026-05-27T14:31:00.000Z" title="发表于 2026-05-27 22:31:00">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/22/2026-5-22-lab5/" title="操作系统 oslab5 实验报告">操作系统 oslab5 实验报告</a><time datetime="2026-05-22T13:48:00.000Z" title="发表于 2026-05-22 21:48:00">2026-05-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/2026-5-7-lab4/" title="操作系统 oslab4 实验报告">操作系统 oslab4 实验报告</a><time datetime="2026-05-07T15:19:00.000Z" title="发表于 2026-05-07 23:19:00">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Ztqs</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
